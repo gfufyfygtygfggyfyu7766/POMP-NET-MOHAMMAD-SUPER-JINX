@@ -1,0 +1,34 @@
+name: POMP NET SUPER JINX validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate shell syntax
+        run: bash -n start.sh
+
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile doctor.py enforce_hosts.py ensure_admin.py jinx_api.py lock.py
+
+      - name: Validate JSON files
+        run: |
+          python -m json.tool xray_config.json >/dev/null
+          python -m json.tool locked_inbound.json >/dev/null
+          python -m json.tool railway.json >/dev/null
+
+      - name: Build Docker image
+        run: docker build --pull -t pompnet-super-jinx:ci .
