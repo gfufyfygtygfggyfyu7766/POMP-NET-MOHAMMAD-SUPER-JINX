@@ -6,7 +6,7 @@
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()\nDEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")\nif not ADMIN or len(ADMIN) < 3 or not DEFAULT_PW or len(DEFAULT_PW) < 14:\n    print("[admin] FATAL: set ADMIN_USERNAME and ADMIN_PASSWORD (minimum 14 characters) before first deploy/reset", flush=True)\n    sys.exit(1)
+ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()\nDEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
