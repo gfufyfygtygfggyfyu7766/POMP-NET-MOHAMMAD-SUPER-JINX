@@ -36,6 +36,9 @@ for port in 80 443; do
     fail "TCP port $port is already in use. Do not stop existing services blindly; free/configure it first."
   fi
 done
+if ss -lunH "sport = :443" | grep -q .; then
+  echo "WARNING: UDP/443 is already in use; HTTP/3 will not be available." >&2
+fi
 
 read -r -p "Domain pointing to this VPS (example: panel.example.com): " DOMAIN
 python3 - "$DOMAIN" <<'PY' || fail "Invalid domain name."
