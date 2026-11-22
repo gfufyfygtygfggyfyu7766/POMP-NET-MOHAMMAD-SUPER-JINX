@@ -6,7 +6,8 @@
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()\nDEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")
+ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
@@ -48,12 +49,18 @@ with GetDB() as db:
     if STORE_BROKEN:
         msg = "[admin] WARNING: reseller data unreadable -> admin roles left exactly as they are this start"
     elif not owners:
+        if len(ADMIN) < 3 or len(DEFAULT_PW) < 14:
+            print("[admin] FATAL: first install requires ADMIN_USERNAME (3+ chars) and ADMIN_PASSWORD (14+ chars)", flush=True)
+            sys.exit(1)
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
             msg = f"[admin] first install: secure admin created for {ADMIN}"
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
     elif RESET:
+        if len(ADMIN) < 3 or len(DEFAULT_PW) < 14:
+            print("[admin] FATAL: password reset requires ADMIN_USERNAME (3+ chars) and ADMIN_PASSWORD (14+ chars)", flush=True)
+            sys.exit(1)
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         taken = any(x.username == ADMIN and x is not a for x in panel_admins)   # 'admin' used by a reseller
         if not taken:
