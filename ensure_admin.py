@@ -6,7 +6,7 @@
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-ADMIN, DEFAULT_PW = "admin", "admin"
+ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()\nDEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")\nif not ADMIN or len(ADMIN) < 3 or not DEFAULT_PW or len(DEFAULT_PW) < 14:\n    print("[admin] FATAL: set ADMIN_USERNAME and ADMIN_PASSWORD (minimum 14 characters) before first deploy/reset", flush=True)\n    sys.exit(1)
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
@@ -50,7 +50,7 @@ with GetDB() as db:
     elif not owners:
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
-            msg = "[admin] first install: login is admin / admin"
+            msg = f"[admin] first install: secure admin created for {ADMIN}"
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
     elif RESET:
@@ -59,7 +59,7 @@ with GetDB() as db:
         if not taken:
             a.username = ADMIN
         set_pw(a, DEFAULT_PW)
-        msg = (f"[admin] RESET_ADMIN_PASSWORD -> login is back to {a.username} / admin (remove the variable now)")
+        msg = (f"[admin] RESET_ADMIN_PASSWORD -> credentials rotated for {a.username} (remove reset variable now)")
     else:
         if not sudo:
             owners[0].is_sudo = True
