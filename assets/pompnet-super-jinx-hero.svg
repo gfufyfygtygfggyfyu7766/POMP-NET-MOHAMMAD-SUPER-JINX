@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8B35FF"/><stop offset=".55" stop-color="#168CFF"/><stop offset="1" stop-color="#050509"/></linearGradient><radialGradient id="r"><stop stop-color="#8B35FF" stop-opacity=".45"/><stop offset="1" stop-color="#050509" stop-opacity="0"/></radialGradient></defs>
+<rect width="1200" height="360" rx="34" fill="#050509"/><circle cx="170" cy="80" r="260" fill="url(#r)"/><circle cx="1050" cy="300" r="300" fill="url(#r)"/>
+<path d="M0 290 Q300 180 600 290 T1200 230" fill="none" stroke="url(#g)" stroke-width="2" opacity=".55"/>
+<rect x="34" y="34" width="1132" height="292" rx="26" fill="none" stroke="#8B35FF" stroke-opacity=".35"/>
+<text x="600" y="132" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="26" letter-spacing="9">POMP NET MOHAMMAD</text>
+<text x="600" y="218" text-anchor="middle" fill="url(#g)" font-family="Arial,sans-serif" font-size="76" font-weight="800" letter-spacing="5">SUPER JINX</text>
+<text x="600" y="270" text-anchor="middle" fill="#c9c5d6" font-family="Arial,sans-serif" font-size="21">SECURE CONTROL • SMART MANAGEMENT • YOUR IDENTITY</text>
+</svg>
