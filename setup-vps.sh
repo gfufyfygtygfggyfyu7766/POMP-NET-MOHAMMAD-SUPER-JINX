@@ -13,6 +13,7 @@ command -v git >/dev/null 2>&1 || fail "git is not installed."
 command -v openssl >/dev/null 2>&1 || fail "openssl is not installed."
 command -v python3 >/dev/null 2>&1 || fail "python3 is not installed."
 command -v ss >/dev/null 2>&1 || fail "ss (iproute2) is not installed."
+command -v curl >/dev/null 2>&1 || fail "curl is not installed."
 docker info >/dev/null 2>&1 || fail "Docker daemon is not running."
 
 if [[ -d "$APP_DIR/.git" ]]; then
