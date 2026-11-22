@@ -17,8 +17,8 @@ export JWT_ACCESS_TOKEN_EXPIRE_MINUTES="${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-43200
 export CUSTOM_TEMPLATES_DIRECTORY=/opt/jinx/templates/
 export SUBSCRIPTION_PAGE_TEMPLATE=subscription/index.html
 # what apps see when they fetch the subscription: title, support link, auto-update every 6h
-export SUB_PROFILE_TITLE="Super JinX"
-export SUB_SUPPORT_URL="https://t.me/Super_Jinx"
+export SUB_PROFILE_TITLE="POMP NET MOHAMMAD"
+export SUB_SUPPORT_URL="https://t.me/PompNett"
 export SUB_UPDATE_INTERVAL="${SUB_UPDATE_INTERVAL:-6}"
 # 🔗 every app gets plain share links (the same way the SuperJinX panels that ping well do it):
 #    the app builds its own config, so no panel JSON template can ever break the connection.
@@ -134,15 +134,8 @@ cd /code
 FRESH=0; [ -s /var/lib/marzban/db.sqlite3 ] || FRESH=1
 alembic upgrade head
 if ! python /opt/ensure_admin.py; then
-  if [ "$FRESH" = "1" ]; then
-    # brand-new install only: the panel still opens with admin / admin
-    echo "[admin] WARNING: admin manager failed on a fresh install -> first login admin / admin"
-    export SUDO_USERNAME=admin SUDO_PASSWORD=admin
-    echo '{"username": "admin", "password": "admin"}' > /run/jinx/system.json
-  else
-    # existing panel: your own admin and password stay as they are (never re-opens admin / admin)
-    echo "[admin] WARNING: admin manager failed; existing admins are unchanged, log in with your own password"
-  fi
+  echo "[admin] FATAL: secure admin initialization failed. Set ADMIN_USERNAME and ADMIN_PASSWORD in Railway Variables; refusing insecure default credentials."
+  exit 1
 fi
 
 # 📶 sing-box / Clash apps (SFA, SFI, Karing, Clash): auto "best latency" tested over plain http = one round trip
