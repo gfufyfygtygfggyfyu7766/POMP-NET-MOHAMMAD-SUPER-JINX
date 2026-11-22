@@ -68,11 +68,12 @@ echo "$USER_JSON" | python -c 'import json,sys; u=json.load(sys.stdin); assert u
 SUB_URL="$(printf '%s' "$USER_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["subscription_url"])')"
 SUB_PATH="$(python -c 'import sys,urllib.parse; u=urllib.parse.urlsplit(sys.argv[1]); print(u.path if u.path else sys.argv[1])' "$SUB_URL")"
 if [[ "$SUB_PATH" == http* ]]; then
-  curl --fail --silent --show-error "$SUB_PATH" >/dev/null
+  SUB_BODY="$(curl --location --fail --silent --show-error "$SUB_PATH")"
 else
-  curl --fail --silent --show-error "$BASE$SUB_PATH" >/dev/null
+  SUB_BODY="$(curl --location --fail --silent --show-error "$BASE$SUB_PATH")"
 fi
-echo "[smoke] subscription endpoint response: OK"
+test -n "${SUB_BODY:-}" || { echo "Subscription endpoint returned an empty body" >&2; exit 1; }
+echo "[smoke] subscription endpoint returned a non-empty body: OK"
 
 # Confirm that Nginx can complete a real WebSocket upgrade to the Xray VLESS inbound.
 JX_ID="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
