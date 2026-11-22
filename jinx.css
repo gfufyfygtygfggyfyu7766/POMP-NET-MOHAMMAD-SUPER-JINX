@@ -85,3 +85,20 @@ td, .chakra-input, input, textarea, .chakra-code, code { unicode-bidi: plaintext
   th, td { font-size: 12px !important; padding: 8px 6px !important; }
   .chakra-badge { font-size: 10px !important; }
 }
+
+
+/* POMP NET MOHAMMAD — SUPER JINX identity layer */
+:root {
+  --pomp-purple: #8B35FF;
+  --pomp-blue: #168CFF;
+  --pomp-bg: #050509;
+  --chakra-colors-brand-500: #8B35FF;
+  --chakra-colors-brand-600: #7024D8;
+  --chakra-colors-brand-700: #5415A8;
+}
+body { background-color: var(--pomp-bg); }
+a, button[aria-label], [role="button"] { transition: border-color .2s ease, box-shadow .2s ease; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--pomp-blue);
+  outline-offset: 2px;
+}
