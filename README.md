@@ -90,10 +90,11 @@
 
 ### 📦 وضعیت انتقال فایل‌ها
 
-- سورس مرجع [MarzbanUpdate](https://github.com/x4gpanell/MarzbanUpdate) در زمان بررسی شامل **۸۴ فایل** بود.
-- مخزن اختصاصی پیش از این به‌روزرسانی شامل **۱۷ فایل** بود.
-- فایل گرافیکی اختصاصی این README نیز اضافه شده است.
-- بنابراین انتقال کامل سورس مرجع هنوز انجام نشده و نباید این نسخه را کپی کامل و آماده انتشار معرفی کرد.
+- سورس مرجع [MarzbanUpdate](https://github.com/x4gpanell/MarzbanUpdate) در زمان بررسی شامل ۸۴ مورد (فایل و پوشه) بود.
+- بخش زیادی از این موارد، مستندات چندزبانه، تصاویر، badgeها و اسکرین‌شات‌ها هستند و فایل اجرایی پنل نیستند.
+- مخزن اختصاصی شامل فایل‌های عملیاتی سفارشی، پوسته، API کمکی، صفحه اشتراک، تنظیمات Xray/Nginx و ابزارهای مدیریتی است.
+- هسته Marzban از image پایه `gozargah/marzban:latest` دریافت می‌شود؛ بنابراین این پروژه بسته استقرار و سفارشی‌سازی MarzbanUpdate است، نه کپی کامل سورس Marzban.
+- فایل `iran-relay.sh` عمداً منتقل نشده؛ برای اجرای خود پنل لازم نیست و به مسیر‌دهی ترافیک از طریق میزبان ثالث مربوط است.
 
 ### 🧪 معیارهای لازم برای تأیید نسخه
 
@@ -142,6 +143,13 @@
 [![GitHub](https://img.shields.io/badge/GITHUB-PROFILE-8B35FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/uxurx7rh7e7xr73uue73e8)
 
 **POMP NET MOHAMMAD — SUPER JINX**
+
+- گروه گفتگو: [@PompNett](https://t.me/PompNett)
+- کانال رسمی: [@pompnet](https://t.me/pompnet)
+- کانال پروکسی: [@Myporoxy18](https://t.me/Myporoxy18)
+- پشتیبانی: [@NovaTunneli](https://t.me/NovaTunneli)
+- توسعه‌دهنده: [@developer_as](https://t.me/developer_as)
+- GitHub: [uxurx7rh7e7xr73uue73e8](https://github.com/uxurx7rh7e7xr73uue73e8)
 
 قدرت ساخت، آزادی انتخاب، کنترل در دستان تو
 
