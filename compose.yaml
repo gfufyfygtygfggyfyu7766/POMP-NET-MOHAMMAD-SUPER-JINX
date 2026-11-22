@@ -1,0 +1,54 @@
+name: pompnet-super-jinx
+
+services:
+  pompnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pompnet-super-jinx
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      PORT: "8080"
+      PANEL_DOMAIN: ${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?Set ADMIN_USERNAME in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      XRAY_SUBSCRIPTION_URL_PREFIX: https://${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
+      SQLALCHEMY_DATABASE_URL: sqlite:////var/lib/marzban/db.sqlite3
+      XRAY_JSON: /var/lib/marzban/xray_config.json
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-43200}
+      SUB_PROFILE_TITLE: POMP NET MOHAMMAD
+      SUB_SUPPORT_URL: https://t.me/PompNett
+    volumes:
+      - pompnet_data:/var/lib/marzban
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
+  caddy:
+    image: caddy:2
+    container_name: pompnet-super-jinx-caddy
+    restart: unless-stopped
+    depends_on:
+      pompnet:
+        condition: service_healthy
+    environment:
+      PANEL_DOMAIN: ${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pompnet_data:
+    name: pompnet_data
+  caddy_data:
+  caddy_config:
