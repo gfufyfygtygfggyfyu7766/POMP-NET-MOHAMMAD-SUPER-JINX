@@ -21,6 +21,7 @@ jobs:
         run: |
           bash -n start.sh
           bash -n tests/runtime-smoke.sh
+          bash -n setup-vps.sh
 
       - name: Validate Python syntax
         run: |
@@ -31,6 +32,9 @@ jobs:
           python -m json.tool xray_config.json >/dev/null
           python -m json.tool locked_inbound.json >/dev/null
           python -m json.tool railway.json >/dev/null
+          cp .env.example .env
+          docker compose config --quiet
+          rm -f .env
 
       - name: Build Docker image
         run: docker build --pull -t pompnet-super-jinx:ci .
