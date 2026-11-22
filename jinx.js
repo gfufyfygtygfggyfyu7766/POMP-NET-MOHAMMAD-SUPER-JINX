@@ -1463,7 +1463,7 @@
   function fixDonate() { var as = document.querySelectorAll('a[href*="#donation"]'); for (var i = 0; i < as.length; i++) if (DON_RE.test(as[i].getAttribute("href") || "")) { as[i].setAttribute("href", location.origin + "/donate/"); as[i].removeAttribute("target"); } }
 
   // 🔗 GitHub link of the panel -> POMP NET MOHAMMAD GitHub (backup for nginx)
-  var GH = "https://github.com/x4gpanell", GH_OLD = /^https?:\/\/(www\.)?github\.com\/gozargah(\/marzban)?\/?$/i;
+  var GH = "https://github.com/uxurx7rh7e7xr73uue73e8", GH_OLD = /^https?:\/\/(www\.)?github\.com\/gozargah(\/marzban)?\/?$/i;
   var ghShadowDone = false, ghLastScan = 0;
   function fixLinks() {
     var as = document.querySelectorAll('a[href*="github.com"]');
@@ -1735,7 +1735,7 @@
    var side=document.querySelector('nav, [role="navigation"], aside');
    if(!pass || side) return;
    var box=document.createElement('div'); box.className='pompnet-login-credit';
-   box.innerHTML='<span class="pompnet-credit-line">کدنویسی و توسعه توسط تیم پمپ نت</span><strong>SUPER JINX</strong><small>POMP NET MOHAMMAD</small>';
+   box.innerHTML='<span class="pompnet-credit-line">کدنویسی و توسعه توسط تیم پمپ نت</span><strong>SUPER JINX</strong><small>POMP NET MOHAMMAD</small><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px;font-size:12px"><a href="https://github.com/uxurx7rh7e7xr73uue73e8" target="_blank" rel="noopener">GitHub</a><a href="https://t.me/PompNett" target="_blank" rel="noopener">گروه</a><a href="https://t.me/pompnet" target="_blank" rel="noopener">کانال</a><a href="https://t.me/Myporoxy18" target="_blank" rel="noopener">پروکسی</a><a href="https://t.me/NovaTunneli" target="_blank" rel="noopener">@NovaTunneli</a><a href="https://t.me/developer_as" target="_blank" rel="noopener">@developer_as</a></div>';
    document.body.appendChild(box);
   } catch(e) {}
  }
