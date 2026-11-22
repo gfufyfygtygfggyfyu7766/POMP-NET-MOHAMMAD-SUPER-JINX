@@ -13,7 +13,7 @@
 
 **پنل اختصاصی مدیریت Marzban با هویت POMP NET و رابط کاربری SUPER JINX**
 
-[گروه پشتیبانی](https://t.me/PompNett) • [کانال پمپ‌نت](https://t.me/pompnet) • [مخزن اصلی](https://github.com/x4gpanell/MarzbanUpdate)
+[گروه پمپ‌نت](https://t.me/PompNett) • [کانال رسمی](https://t.me/pompnet) • [کانال پروکسی](https://t.me/Myporoxy18) • [GitHub سازنده](https://github.com/uxurx7rh7e7xr73uue73e8)
 
 </div>
 
@@ -75,9 +75,9 @@
 |:---|:---:|
 | مخزن اختصاصی POMP NET | 🟢 ایجاد شده |
 | سفارشی‌سازی برند و فایل‌های منتخب | 🟡 در حال تکمیل |
-| انتقال کامل سورس مرجع | 🔴 انجام نشده |
+| انتقال کپی کامل ۸۴ مورد مرجع | 🟡 عمداً انجام نشده؛ بخش زیادی مستندات/تصویر است |
 | بررسی وابستگی‌ها و فایل‌های جانبی | 🔴 باقی‌مانده |
-| ساخت Docker | ⚪ هنوز اجرا و تأیید نشده |
+| بررسی نحوی Shell/Python/JSON | 🟢 موفق در GitHub Actions |\n| ساخت Docker image | 🟢 موفق در GitHub Actions |
 | تست ورود مدیر | ⚪ هنوز اجرا و تأیید نشده |
 | تست ساخت کاربر و مدیریت اشتراک | ⚪ هنوز اجرا و تأیید نشده |
 | تست اجرای واقعی Xray | ⚪ هنوز اجرا و تأیید نشده |
@@ -99,7 +99,7 @@
 قبل از اعلام آماده‌بودن پروژه، موارد زیر باید روی یک محیط آزمایشی واقعی بررسی شوند:
 
 1. تکمیل انتقال فایل‌های موردنیاز و وابستگی‌ها، بدون حذف قابلیت‌های هسته.
-2. موفقیت ساخت Docker و بالا آمدن همه سرویس‌های لازم.
+2. موفقیت ساخت Docker؛ این مرحله در GitHub Actions با موفقیت انجام شده است. بالا آمدن سرویس‌ها در runtime هنوز باید جداگانه بررسی شود.
 3. ورود مدیر و حفظ رمز موجود پس از ری‌استارت.
 4. ساخت، ویرایش، غیرفعال‌سازی و حذف آزمایشی کاربر.
 5. اجرای سالم Xray و بررسی لاگ خطاها.
@@ -107,7 +107,7 @@
 7. ری‌استارت و بازسازی سرویس با اطمینان از باقی‌ماندن دیتابیس و تنظیمات روی Volume.
 8. بررسی امنیت متغیرها، مسیرهای عمومی و دسترسی‌های مدیریتی.
 
-تا وقتی این آزمون‌ها اجرا و نتیجه‌شان ثبت نشده، وضعیت آن‌ها **تأییدنشده** باقی می‌ماند.
+تست‌های نحوی و ساخت Docker در GitHub Actions با موفقیت ثبت شده‌اند (Run #1، commit `66f98dbc2e433bf34f11191fccfbd53e6fa7d077`). این موفقیت فقط صحت نحوی و ساخت image را ثابت می‌کند؛ ورود، ساخت کاربر، Xray، لینک اشتراک و ماندگاری Volume هنوز **تأییدنشده** هستند.
 
 ## 🚀 استقرار و زیرساخت
 
@@ -136,7 +136,7 @@
 <div align="center">
 
 [![Telegram Group](https://img.shields.io/badge/TELEGRAM-GROUP-168CFF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/PompNett)
-[![Telegram Channel](https://img.shields.io/badge/TELEGRAM-CHANNEL-8B35FF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/pompnet)
+[![Telegram Channel](https://img.shields.io/badge/TELEGRAM-CHANNEL-8B35FF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/pompnet)\n[![Proxy Channel](https://img.shields.io/badge/PROXY-CHANNEL-168CFF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Myporoxy18)\n[![GitHub](https://img.shields.io/badge/GITHUB-PROFILE-8B35FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/uxurx7rh7e7xr73uue73e8)
 
 **POMP NET MOHAMMAD — SUPER JINX**
 
