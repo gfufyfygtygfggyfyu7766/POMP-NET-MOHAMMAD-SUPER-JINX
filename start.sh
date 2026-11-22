@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo "=== ⚡ Super JinX | Marzban on Railway ==="
+echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
