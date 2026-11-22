@@ -77,7 +77,8 @@
 | سفارشی‌سازی برند و فایل‌های منتخب | 🟡 در حال تکمیل |
 | انتقال کپی کامل ۸۴ مورد مرجع | 🟡 عمداً انجام نشده؛ بخش زیادی مستندات/تصویر است |
 | بررسی وابستگی‌ها و فایل‌های جانبی | 🔴 باقی‌مانده |
-| بررسی نحوی Shell/Python/JSON | 🟢 موفق در GitHub Actions |\n| ساخت Docker image | 🟢 موفق در GitHub Actions |
+| بررسی نحوی Shell/Python/JSON | 🟢 موفق در GitHub Actions |
+| ساخت Docker image | 🟢 موفق در GitHub Actions |
 | تست ورود مدیر | ⚪ هنوز اجرا و تأیید نشده |
 | تست ساخت کاربر و مدیریت اشتراک | ⚪ هنوز اجرا و تأیید نشده |
 | تست اجرای واقعی Xray | ⚪ هنوز اجرا و تأیید نشده |
@@ -136,7 +137,9 @@
 <div align="center">
 
 [![Telegram Group](https://img.shields.io/badge/TELEGRAM-GROUP-168CFF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/PompNett)
-[![Telegram Channel](https://img.shields.io/badge/TELEGRAM-CHANNEL-8B35FF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/pompnet)\n[![Proxy Channel](https://img.shields.io/badge/PROXY-CHANNEL-168CFF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Myporoxy18)\n[![GitHub](https://img.shields.io/badge/GITHUB-PROFILE-8B35FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/uxurx7rh7e7xr73uue73e8)
+[![Telegram Channel](https://img.shields.io/badge/TELEGRAM-CHANNEL-8B35FF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/pompnet)
+[![Proxy Channel](https://img.shields.io/badge/PROXY-CHANNEL-168CFF?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Myporoxy18)
+[![GitHub](https://img.shields.io/badge/GITHUB-PROFILE-8B35FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/uxurx7rh7e7xr73uue73e8)
 
 **POMP NET MOHAMMAD — SUPER JINX**
 
