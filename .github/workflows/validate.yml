@@ -18,7 +18,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate shell syntax
-        run: bash -n start.sh
+        run: |
+          bash -n start.sh
+          bash -n tests/runtime-smoke.sh
 
       - name: Validate Python syntax
         run: |
@@ -32,3 +34,6 @@ jobs:
 
       - name: Build Docker image
         run: docker build --pull -t pompnet-super-jinx:ci .
+
+      - name: Runtime integration test (login, user, subscription, Xray, persistence)
+        run: bash tests/runtime-smoke.sh pompnet-super-jinx:ci
