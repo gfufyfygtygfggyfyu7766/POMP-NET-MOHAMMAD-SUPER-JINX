@@ -1,7 +1,7 @@
 # Super JinX admin manager (runs on every start)
-#  - first install (no panel admin yet): creates  admin / admin
-#  - after that it NEVER touches your admin: a username/password changed from the panel menu stays forever
-#  - forgot it? set RESET_ADMIN_PASSWORD=1 in Railway + redeploy -> login is back to admin / admin
+#  - first install: requires ADMIN_USERNAME and ADMIN_PASSWORD (minimum 14 characters)
+#  - existing panel admins and passwords are preserved on normal restarts
+#  - explicit reset: set RESET_ADMIN_PASSWORD=1 with new ADMIN_USERNAME and ADMIN_PASSWORD
 #  - creates a hidden internal admin for the support bots (random password, rotated every start)
 import json, os, secrets, sys
 from datetime import datetime, timezone
