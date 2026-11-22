@@ -5,7 +5,7 @@ echo "=== ⚡ Super JinX | Marzban on Railway ==="
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
 # No hard-coded env login: the admin lives in the database, so a password changed in the panel really works.
-# (first install = admin / admin, see ensure_admin.py)
+# (first install requires secure ADMIN_USERNAME and ADMIN_PASSWORD, see ensure_admin.py)
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
