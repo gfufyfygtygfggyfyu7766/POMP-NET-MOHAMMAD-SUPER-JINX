@@ -1,4 +1,4 @@
-/* ⚡ Super JinX dashboard helper
+/* ⚡ POMP NET MOHAMMAD dashboard helper
    1) first visit opens in Persian; language menu still works and is remembered
    2) adds "تغییر نام کاربری و رمز عبور" to the panel's main menu (☰), styled with the panel's own theme
       (same classes, same icon set, same dialog look, light & dark). Asks for the CURRENT username + password,
@@ -790,7 +790,7 @@
     }
     function credText(u, p, dom) {
       var url = agentUrl(dom);
-      return L4("پنل نمایندگی Super JinX\n", "Super JinX reseller panel\n", "Панель реселлера Super JinX\n", "Super JinX 代理面板\n") + rt("panelUrl") + ": " + url + "\n" + rt("name") + ": " + u + (p ? "\n" + rt("pass") + ": " + p : "");
+      return L4("پنل نمایندگی POMP NET MOHAMMAD\n", "POMP NET MOHAMMAD reseller panel\n", "Панель реселлера POMP NET MOHAMMAD\n", "POMP NET MOHAMMAD 代理面板\n") + rt("panelUrl") + ": " + url + "\n" + rt("name") + ": " + u + (p ? "\n" + rt("pass") + ": " + p : "");
     }
     function load(done) {
       if (!list.length) { f.body.innerHTML = '<div class="jr-empty"><span class="jr-sp"></span> ' + H(rt("loading")) + '</div>'; }
@@ -1462,7 +1462,7 @@
   window.jinxDonate = openDonate;
   function fixDonate() { var as = document.querySelectorAll('a[href*="#donation"]'); for (var i = 0; i < as.length; i++) if (DON_RE.test(as[i].getAttribute("href") || "")) { as[i].setAttribute("href", location.origin + "/donate/"); as[i].removeAttribute("target"); } }
 
-  // 🔗 GitHub link of the panel -> Super JinX GitHub (backup for nginx)
+  // 🔗 GitHub link of the panel -> POMP NET MOHAMMAD GitHub (backup for nginx)
   var GH = "https://github.com/x4gpanell", GH_OLD = /^https?:\/\/(www\.)?github\.com\/gozargah(\/marzban)?\/?$/i;
   var ghShadowDone = false, ghLastScan = 0;
   function fixLinks() {
@@ -1723,4 +1723,22 @@
   new MutationObserver(function () { if (pend) return; pend = true; setTimeout(function () { pend = false; try { fix(); } catch (e) {} }, 60); })
     .observe(document.documentElement, { childList: true, subtree: true });
   try { fix(); } catch (e) {}
+})();
+
+
+/* POMP NET MOHAMMAD — animated login credit */
+(function(){
+ function mountCredit(){
+  try {
+   if(!document.body || document.querySelector('.pompnet-login-credit')) return;
+   var pass=document.querySelector('input[type="password"]');
+   var side=document.querySelector('nav, [role="navigation"], aside');
+   if(!pass || side) return;
+   var box=document.createElement('div'); box.className='pompnet-login-credit';
+   box.innerHTML='<span class="pompnet-credit-line">کدنویسی و توسعه توسط تیم پمپ نت</span><strong>SUPER JINX</strong><small>POMP NET MOHAMMAD</small>';
+   document.body.appendChild(box);
+  } catch(e) {}
+ }
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountCredit); else mountCredit();
+ setTimeout(mountCredit,1200);
 })();
