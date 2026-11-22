@@ -102,3 +102,126 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   outline: 2px solid var(--pomp-blue);
   outline-offset: 2px;
 }
+
+
+/* ---------- SUPER JINX premium visual layer (non-invasive) ---------- */
+:root {
+  --pomp-panel: #0b0b14;
+  --pomp-panel-raised: #11111d;
+  --pomp-border: rgba(139, 53, 255, .22);
+  --pomp-muted: #9b9bb0;
+  --pomp-shadow: 0 14px 38px rgba(0, 0, 0, .28);
+}
+html { scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(139,53,255,.14), transparent 34rem),
+    radial-gradient(ellipse at 92% 12%, rgba(22,140,255,.10), transparent 30rem),
+    #050509 !important;
+  background-attachment: fixed;
+}
+.chakra-ui-dark, [data-theme="dark"] {
+  --chakra-colors-brand-50: #f2eaff;
+  --chakra-colors-brand-100: #e2ccff;
+  --chakra-colors-brand-200: #c69aff;
+  --chakra-colors-brand-300: #aa68ff;
+  --chakra-colors-brand-400: #963fff;
+  --chakra-colors-brand-500: #8B35FF;
+  --chakra-colors-brand-600: #7024D8;
+  --chakra-colors-brand-700: #5415A8;
+}
+.chakra-ui-dark .chakra-card,
+.chakra-ui-dark .chakra-modal__content,
+.chakra-ui-dark .chakra-menu__menu-list,
+[data-theme="dark"] .chakra-card,
+[data-theme="dark"] .chakra-modal__content,
+[data-theme="dark"] .chakra-menu__menu-list {
+  background: linear-gradient(145deg, rgba(19,18,31,.97), rgba(10,10,18,.97)) !important;
+  border: 1px solid var(--pomp-border) !important;
+  box-shadow: var(--pomp-shadow);
+}
+.chakra-ui-dark .chakra-card,
+[data-theme="dark"] .chakra-card {
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.chakra-ui-dark .chakra-card:hover,
+[data-theme="dark"] .chakra-card:hover {
+  border-color: rgba(139,53,255,.42) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.34), 0 0 22px rgba(139,53,255,.07);
+}
+.chakra-ui-dark .chakra-table thead th,
+[data-theme="dark"] .chakra-table thead th {
+  color: #c9b7ed;
+  background: rgba(139,53,255,.08);
+  border-color: rgba(139,53,255,.16);
+}
+.chakra-ui-dark .chakra-table tbody tr:hover,
+[data-theme="dark"] .chakra-table tbody tr:hover {
+  background: rgba(139,53,255,.055);
+}
+.chakra-ui-dark .chakra-table td,
+.chakra-ui-dark .chakra-table th,
+[data-theme="dark"] .chakra-table td,
+[data-theme="dark"] .chakra-table th {
+  border-color: rgba(255,255,255,.065);
+}
+.chakra-ui-dark .chakra-input,
+.chakra-ui-dark .chakra-select,
+.chakra-ui-dark .chakra-textarea,
+[data-theme="dark"] .chakra-input,
+[data-theme="dark"] .chakra-select,
+[data-theme="dark"] .chakra-textarea {
+  background: rgba(5,5,12,.72) !important;
+  border-color: rgba(139,53,255,.24) !important;
+}
+.chakra-ui-dark .chakra-input:hover,
+.chakra-ui-dark .chakra-select:hover,
+.chakra-ui-dark .chakra-textarea:hover,
+[data-theme="dark"] .chakra-input:hover,
+[data-theme="dark"] .chakra-select:hover,
+[data-theme="dark"] .chakra-textarea:hover {
+  border-color: rgba(139,53,255,.52) !important;
+}
+.chakra-ui-dark .chakra-input:focus,
+.chakra-ui-dark .chakra-select:focus,
+.chakra-ui-dark .chakra-textarea:focus,
+[data-theme="dark"] .chakra-input:focus,
+[data-theme="dark"] .chakra-select:focus,
+[data-theme="dark"] .chakra-textarea:focus {
+  border-color: #168CFF !important;
+  box-shadow: 0 0 0 1px #168CFF, 0 0 16px rgba(22,140,255,.12) !important;
+}
+.chakra-button:not([data-variant="ghost"]):not([data-variant="link"]) {
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+.chakra-button:active { transform: translateY(1px); }
+.chakra-ui-dark .chakra-button[data-variant="solid"],
+[data-theme="dark"] .chakra-button[data-variant="solid"] {
+  box-shadow: 0 5px 18px rgba(139,53,255,.16);
+}
+.chakra-ui-dark .chakra-badge,
+[data-theme="dark"] .chakra-badge {
+  border: 1px solid rgba(139,53,255,.16);
+  border-radius: 999px;
+  padding-inline: .55em;
+}
+.chakra-ui-dark .chakra-tabs__tab[aria-selected="true"],
+[data-theme="dark"] .chakra-tabs__tab[aria-selected="true"] {
+  color: #caa8ff;
+  border-color: #8B35FF;
+}
+.chakra-ui-dark .chakra-divider,
+[data-theme="dark"] .chakra-divider {
+  border-color: rgba(255,255,255,.08);
+}
+.chakra-ui-dark .chakra-modal__overlay,
+[data-theme="dark"] .chakra-modal__overlay {
+  background: rgba(0,0,0,.72) !important;
+  backdrop-filter: blur(5px);
+}
+a { text-underline-offset: 3px; }
+a:hover { color: #72b7ff; }
+:focus-visible { scroll-margin-block: 5rem; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
