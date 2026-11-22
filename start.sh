@@ -17,7 +17,7 @@ export JWT_ACCESS_TOKEN_EXPIRE_MINUTES="${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-43200
 export CUSTOM_TEMPLATES_DIRECTORY=/opt/jinx/templates/
 export SUBSCRIPTION_PAGE_TEMPLATE=subscription/index.html
 # what apps see when they fetch the subscription: title, support link, auto-update every 6h
-export SUB_PROFILE_TITLE="POMP NET MOHAMMAD"
+export SUB_PROFILE_TITLE="POMP NET MOHAMMAD — SUPER JINX"
 export SUB_SUPPORT_URL="https://t.me/PompNett"
 export SUB_UPDATE_INTERVAL="${SUB_UPDATE_INTERVAL:-6}"
 # 🔗 every app gets plain share links (the same way the SuperJinX panels that ping well do it):
