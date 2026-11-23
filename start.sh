@@ -104,8 +104,8 @@ server {
   include /etc/nginx/jinx-port.inc;
   absolute_redirect off;
   location = / { return 302 /dashboard/; }
-  # Keep Railway healthchecks on a direct 200 endpoint; dashboard login redirects are not health responses.
-  location = /health { proxy_pass http://127.0.0.1:8000/docs; proxy_set_header Host $host; add_header Cache-Control "no-store" always; }
+  # /docs is disabled in production; use the live Marzban API endpoint for health.
+  location = /health { proxy_pass http://127.0.0.1:8000/api/hosts; proxy_set_header Host $host; add_header Cache-Control "no-store" always; }
   location = /donate { return 301 /donate/; }
   location = /donate/ { proxy_pass http://127.0.0.1:8090/jinx-api/donate-page; }
   location = /donate/config.js { proxy_pass http://127.0.0.1:8090/jinx-api/donate-config.js; }
