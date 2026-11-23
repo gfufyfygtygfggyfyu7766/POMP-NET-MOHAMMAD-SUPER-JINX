@@ -117,7 +117,7 @@ with GetDB() as db:
         try:
             fd = os.open(DEFAULT_ADMIN_APPLIED, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                _f.write(ADMIN + "\\n")
+                _f.write(ADMIN + "\n")
                 _f.flush()
                 os.fsync(_f.fileno())
         except OSError as e:
