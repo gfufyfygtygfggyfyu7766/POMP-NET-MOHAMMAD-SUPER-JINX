@@ -55,6 +55,14 @@ login() {
 
 start_panel
 wait_panel
+
+# Verify the branded stylesheet is actually served by Nginx and injected into the dashboard HTML.
+CSS_BODY="$(curl --fail --silent --show-error "$BASE/jinx.css?v=8")"
+grep -q -- "--pomp-purple: #8B35FF" <<< "$CSS_BODY"
+DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/dashboard/")"
+grep -q -- "/jinx.css?v=8" <<< "$DASHBOARD_HTML"
+echo "[smoke] branded CSS endpoint + dashboard stylesheet injection: OK"
+
 TOKEN="$(login)"
 echo "[smoke] admin login: OK"
 
