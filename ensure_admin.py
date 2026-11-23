@@ -1,13 +1,15 @@
 # Super JinX admin manager (runs on every start)
-#  - first install: requires ADMIN_USERNAME and ADMIN_PASSWORD (minimum 14 characters)
+#  - first install: creates admin automatically; if ADMIN_PASSWORD is absent, generates a strong random password
+#  - generated first-login credentials are saved privately on the persistent data volume and printed once to deploy logs
 #  - existing panel admins and passwords are preserved on normal restarts
 #  - explicit reset: set RESET_ADMIN_PASSWORD=1 with new ADMIN_USERNAME and ADMIN_PASSWORD
 #  - creates a hidden internal admin for the support bots (random password, rotated every start)
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-ADMIN = os.environ.get("ADMIN_USERNAME", "").strip()
+ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "")
+FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
@@ -49,12 +51,41 @@ with GetDB() as db:
     if STORE_BROKEN:
         msg = "[admin] WARNING: reseller data unreadable -> admin roles left exactly as they are this start"
     elif not owners:
-        if len(ADMIN) < 3 or len(DEFAULT_PW) < 14:
-            print("[admin] FATAL: first install requires ADMIN_USERNAME (3+ chars) and ADMIN_PASSWORD (14+ chars)", flush=True)
+        if len(ADMIN) < 3:
+            print("[admin] FATAL: ADMIN_USERNAME must contain at least 3 characters", flush=True)
+            sys.exit(1)
+        # Generate a one-time password when the deployer has not supplied one.
+        # Keep it on the persistent data volume so a database recovery can reuse it.
+        generated = False
+        if not DEFAULT_PW:
+            try:
+                with open(FIRST_LOGIN_FILE, encoding="utf-8") as _f:
+                    DEFAULT_PW = _f.read().strip()
+            except OSError:
+                DEFAULT_PW = secrets.token_urlsafe(32)
+                generated = True
+        if len(DEFAULT_PW) < 14:
+            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters", flush=True)
             sys.exit(1)
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
             msg = f"[admin] first install: secure admin created for {ADMIN}"
+            if generated:
+                try:
+                    fd = os.open(FIRST_LOGIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                    with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                        _f.write(DEFAULT_PW)
+                        _f.flush()
+                        os.fsync(_f.fileno())
+                except FileExistsError:
+                    pass
+                print(f"[admin] ONE-TIME LOGIN -> username: {ADMIN} | password: {DEFAULT_PW}", flush=True)
+            elif not os.path.exists(FIRST_LOGIN_FILE):
+                fd = os.open(FIRST_LOGIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                    _f.write(DEFAULT_PW)
+                    _f.flush()
+                    os.fsync(_f.fileno())
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
     elif RESET:
