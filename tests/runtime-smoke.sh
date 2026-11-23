@@ -32,7 +32,8 @@ start_panel() {
 
 wait_panel() {
   for _ in $(seq 1 120); do
-    if curl -fsS "$BASE/health" >/dev/null 2>&1; then return 0; fi
+    STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$BASE/health" 2>/dev/null || true)"
+    if [[ "$STATUS" == "200" ]]; then return 0; fi
     if ! docker inspect -f '{{.State.Running}}' "$NAME" 2>/dev/null | grep -q true; then
       docker logs "$NAME" || true
       return 1
