@@ -1,8 +1,8 @@
 # Super JinX admin manager (runs on every start)
 #  - first install: creates admin as admin; ADMIN_PASSWORD overrides the built-in first-deploy default
 #  - generated first-login credentials are saved privately on the persistent data volume and printed once to deploy logs
-#  - existing panel admins and passwords are preserved on normal restarts
-#  - explicit reset: set RESET_ADMIN_PASSWORD=1 with new ADMIN_USERNAME and ADMIN_PASSWORD
+#  - existing installations receive the configured default admin credentials once
+#  - a marker on the persistent data volume prevents password changes on later restarts
 #  - creates a hidden internal admin for the support bots (random password, rotated every start)
 import json, os, secrets, sys
 from datetime import datetime, timezone
@@ -10,9 +10,11 @@ sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "PnJ!7vQ#4mR@9xL2zK8$wT6c")
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
+DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
-RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
+RESET = (os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
+         or not os.path.exists(DEFAULT_ADMIN_APPLIED))
 
 from passlib.context import CryptContext
 from app.db import GetDB
@@ -109,6 +111,17 @@ with GetDB() as db:
     else:
         set_pw(s, sys_pw)
     db.commit()
+    # Apply the repository default to an existing installation only once. The marker
+    # lives beside the database, so normal restarts preserve any later password change.
+    if not STORE_BROKEN:
+        try:
+            fd = os.open(DEFAULT_ADMIN_APPLIED, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                _f.write(ADMIN + "\\n")
+                _f.flush()
+                os.fsync(_f.fileno())
+        except OSError as e:
+            print(f"[admin] WARNING: could not save default-admin marker: {e}", flush=True)
     print(msg, flush=True)
 
 os.makedirs("/run/jinx", exist_ok=True)
