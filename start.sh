@@ -105,7 +105,7 @@ server {
   absolute_redirect off;
   location = / { return 302 /dashboard/; }
   # /docs is disabled in production; use the live Marzban API endpoint for health.
-  location = /health { proxy_pass http://127.0.0.1:8000/api/hosts; proxy_set_header Host $host; add_header Cache-Control "no-store" always; }
+  location = /health { proxy_pass http://127.0.0.1:8000/dashboard/; proxy_set_header Host $host; add_header Cache-Control "no-store" always; }
   location = /donate { return 301 /donate/; }
   location = /donate/ { proxy_pass http://127.0.0.1:8090/jinx-api/donate-page; }
   location = /donate/config.js { proxy_pass http://127.0.0.1:8090/jinx-api/donate-config.js; }
