@@ -56,7 +56,6 @@ login() {
 
 start_panel
 wait_panel
-set -x
 
 # Verify the independent POMP NET dashboard is served at the panel entry route.
 DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/panel/")"
