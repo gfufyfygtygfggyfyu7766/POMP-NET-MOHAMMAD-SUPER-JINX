@@ -5,7 +5,7 @@ echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
 # No hard-coded env login: the admin lives in the database, so a password changed in the panel really works.
-# (first install requires secure ADMIN_USERNAME and ADMIN_PASSWORD, see ensure_admin.py)
+# (first install defaults to admin and generates a one-time strong password if ADMIN_PASSWORD is not supplied)
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
@@ -135,7 +135,7 @@ cd /code
 FRESH=0; [ -s /var/lib/marzban/db.sqlite3 ] || FRESH=1
 alembic upgrade head
 if ! python /opt/ensure_admin.py; then
-  echo "[admin] FATAL: secure admin initialization failed. Set ADMIN_USERNAME and ADMIN_PASSWORD in Railway Variables; refusing insecure default credentials."
+  echo "[admin] FATAL: admin initialization failed. Check the preceding [admin] error in deploy logs."
   exit 1
 fi
 
