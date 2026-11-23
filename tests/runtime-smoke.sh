@@ -61,6 +61,7 @@ wait_panel
 DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/panel/")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$DASHBOARD_HTML"
 grep -q -- "SUPER JINX CONTROL" <<< "$DASHBOARD_HTML"
+grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$DASHBOARD_HTML"
 if grep -qi -- "SideRail" <<< "$DASHBOARD_HTML"; then
   echo "Unexpected third-party dashboard branding in the POMP NET UI" >&2
   exit 1
@@ -85,6 +86,15 @@ else
   SUB_BODY="$(curl --location --fail --silent --show-error "$BASE$SUB_PATH")"
 fi
 test -n "${SUB_BODY:-}" || { echo "Subscription endpoint returned an empty body" >&2; exit 1; }
+# Browser subscription page must render the custom Persian POMP NET template, not only raw config text.
+SUB_PAGE="$(curl --location --fail --silent --show-error -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124.0 Mobile Safari/537.36' "$BASE$SUB_PATH")"
+grep -q -- "POMP NET MOHAMMAD" <<< "$SUB_PAGE"
+grep -q -- "#8B35FF" <<< "$SUB_PAGE"
+if grep -qi -- "SideRail" <<< "$SUB_PAGE"; then
+  echo "Unexpected third-party subscription branding" >&2
+  exit 1
+fi
+echo "[smoke] custom subscription page + POMP NET theme: OK"
 echo "[smoke] subscription endpoint returned a non-empty body: OK"
 
 # Confirm that Nginx can complete a real WebSocket upgrade to the Xray VLESS inbound.
