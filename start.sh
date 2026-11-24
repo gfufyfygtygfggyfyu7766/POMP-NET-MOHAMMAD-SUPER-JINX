@@ -4,8 +4,8 @@ echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
-# Admin credentials are stored as a bcrypt hash in the persistent database.
-# ADMIN_USERNAME defaults to admin. A missing ADMIN_PASSWORD triggers a strong one-time password.
+# Owner credentials are stored as a bcrypt hash in the persistent Marzban database.
+# The owner username is fixed as ADMIN_tanel9990; ensure_admin.py generates a one-time password if no Secret is supplied.
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
