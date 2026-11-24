@@ -248,3 +248,20 @@ body{background-image:radial-gradient(ellipse at 12% 0%,rgba(139,53,255,.19),tra
 .chakra-ui-dark a,[data-theme=dark] a{color:#b995ff}
 @media(max-width:768px){.chakra-container{padding-inline:12px!important}.chakra-modal__content{max-height:calc(100dvh - 16px)!important;overflow:auto!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+
+/* POMP NET MOHAMMAD — premium native panel finish; no controls or API routes hidden */
+:root{--chakra-colors-brand-500:#8b35ff;--chakra-colors-brand-600:#7130d6;--chakra-colors-brand-700:#5a25b0}
+body{background-color:#07070d}
+body,button,input,textarea,select{font-family:"Vazirmatn",Tahoma,sans-serif}
+nav,aside,[role=navigation]{scrollbar-width:thin;scrollbar-color:#59368b transparent}
+button,a,[role=button]{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+input,textarea,select{border-color:rgba(139,53,255,.22)!important}
+input:focus,textarea:focus,select:focus{border-color:#8b35ff!important;box-shadow:0 0 0 1px #8b35ff55!important}
+table thead th{font-weight:800}
+table tbody tr:hover{background:rgba(139,53,255,.055)}
+/* login and native dashboard panels */
+form [type=submit],button[type=submit]{background:linear-gradient(110deg,#8b35ff,#5b39d6 62%,#168cff)!important;color:#fff!important;border:0!important;box-shadow:0 8px 24px rgba(91,57,214,.2)}
+form [type=submit]:hover,button[type=submit]:hover{filter:brightness(1.12);box-shadow:0 10px 28px rgba(139,53,255,.28)}
+[class*=chakra-card],.chakra-card,.chakra-modal__content{border-color:rgba(139,53,255,.18)!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
