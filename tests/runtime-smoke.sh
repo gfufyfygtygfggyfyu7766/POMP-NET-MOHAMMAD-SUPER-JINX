@@ -61,11 +61,16 @@ login() {
     | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])'
 }
 
-# Subscription HTTPS port and visual accessibility regression checks.
-grep -q 'https://\$PUBLIC_DOMAIN:2096' start.sh
-grep -q '2096:2096' compose.yaml
-grep -q 'https://{\$PANEL_DOMAIN}:2096' Caddyfile
-echo "[smoke] subscription HTTPS port 2096 configuration: OK"
+# Railway terminates public TLS at its HTTPS edge (443); the container listens on HTTP 8080.
+# Port 2096 is not assumed to exist on Railway. VPS/Compose and Caddy deployments keep
+# their own separately configured 2096 listeners and are not used to build Railway links.
+grep -q 'XRAY_SUBSCRIPTION_URL_PREFIX="https://\$PUBLIC_DOMAIN"' start.sh
+if grep -q 'XRAY_SUBSCRIPTION_URL_PREFIX="https://\$PUBLIC_DOMAIN:2096"' start.sh; then
+  echo "Railway subscription URL must use the TLS edge hostname without an unexposed :2096 port" >&2
+  exit 1
+fi
+grep -q 'listen 8080' nginx.conf
+echo "[smoke] Railway HTTPS edge -> internal port 8080 subscription routing: OK"
 grep -q -- 'POMP NET legibility and mobile performance overrides' jinx.css
 grep -q -- 'POMP NET readable subscription view' sub.html
 grep -q -- 'prefers-reduced-motion:reduce' jinx.css
