@@ -33,6 +33,7 @@ start_panel() {
     -e ADMIN_PASSWORD="$PASSWORD" \
     -e ALLOW_INSECURE_ADMIN_PASSWORD=1 \
     -e XRAY_SUBSCRIPTION_URL_PREFIX="$BASE" \
+    -e PANEL_DOMAIN="ci.example.net" \
     -e SUB_PROFILE_TITLE="POMP NET MOHAMMAD" \
     "$IMAGE" >/dev/null
 }
@@ -114,8 +115,8 @@ USER_JSON="$(curl --fail --silent --show-error --retry 10 --retry-all-errors --r
   -X POST "$BASE/api/user" \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
-  --data '{"username":"jinx_ci_smoke","proxies":{"vless":{}},"inbounds":{"vless":["VLESS WS"]},"expire":0,"data_limit":0,"data_limit_reset_strategy":"no_reset","status":"active"}')"
-echo "$USER_JSON" | python -c 'import json,sys; u=json.load(sys.stdin); assert u["username"]=="jinx_ci_smoke"; assert u.get("subscription_url"); print("[smoke] create user + subscription URL: OK")'
+  --data '{"username":"jinx_ci_smoke","proxies":{"vless":{},"vmess":{},"trojan":{}},"inbounds":{"vless":["VLESS WS"],"vmess":["VMESS WS"],"trojan":["TROJAN WS"]},"expire":0,"data_limit":0,"data_limit_reset_strategy":"no_reset","status":"active"}')"
+echo "$USER_JSON" | python -c 'import json,sys; u=json.load(sys.stdin); assert u["username"]=="jinx_ci_smoke"; assert u.get("subscription_url"); print("[smoke] create VLESS + VMess + Trojan user + subscription URL: OK")'
 
 SUB_URL="$(printf '%s' "$USER_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["subscription_url"])')"
 SUB_PATH="$(python -c 'import sys,urllib.parse; u=urllib.parse.urlsplit(sys.argv[1]); print(u.path if u.path else sys.argv[1])' "$SUB_URL")"
@@ -125,6 +126,8 @@ else
   SUB_BODY="$(curl --location --fail --silent --show-error "$BASE$SUB_PATH")"
 fi
 test -n "${SUB_BODY:-}" || { echo "Subscription endpoint returned an empty body" >&2; exit 1; }
+# Decode the real Marzban subscription and verify every selected protocol is actually emitted.
+printf '%s' "$SUB_BODY" | python -c 'import base64,sys; raw=sys.stdin.buffer.read().strip(); txt=raw.decode(errors="ignore");\ntry: txt=base64.b64decode(raw + b"="*((4-len(raw)%4)%4), validate=False).decode(errors="ignore")\nexcept Exception: pass\nlines=[x.strip() for x in txt.splitlines() if x.strip()]\nmissing=[p for p in ("vless://","vmess://","trojan://") if not any(x.lower().startswith(p) for x in lines)]\nassert not missing, "subscription missing protocol links: "+", ".join(missing)\nprint("[smoke] real subscription contains VLESS + VMess + Trojan links: OK")'
 # Browser subscription page must render the custom Persian POMP NET template, not only raw config text.
 SUB_PAGE="$(curl --location --fail --silent --show-error -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124.0 Mobile Safari/537.36' -H 'Accept: text/html,application/xhtml+xml' "$BASE$SUB_PATH")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$SUB_PAGE"
@@ -166,22 +169,23 @@ RESELLER_BODY="$(curl --location --fail --silent --show-error "$BASE$RESELLER_PA
 test -n "$RESELLER_BODY" || { echo "Reseller subscription endpoint returned an empty body" >&2; exit 1; }
 echo "[smoke] reseller subscription endpoint: OK"
 
-# Confirm that Nginx can complete a real WebSocket upgrade to the Xray VLESS inbound.
+# Confirm real WebSocket upgrades through Nginx to each selected Xray protocol inbound.
 JX_ID="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
 python - "$BASE" "$JX_ID" <<'PY'
 import http.client, sys
 from urllib.parse import urlsplit
 base, secret = sys.argv[1], sys.argv[2]
 u = urlsplit(base)
-c = http.client.HTTPConnection(u.hostname, u.port, timeout=12)
-c.request("GET", f"/cdn/{secret}/v", headers={
-    "Host": u.netloc, "Upgrade": "websocket", "Connection": "Upgrade",
-    "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==", "Sec-WebSocket-Version": "13"
-})
-r = c.getresponse()
-assert r.status == 101, f"WebSocket upgrade returned HTTP {r.status}"
-c.close()
-print("[smoke] Nginx -> Xray WebSocket handshake: OK")
+for suffix, label in (("/v", "VLESS"), ("/m", "VMess"), ("/t", "Trojan")):
+    c = http.client.HTTPConnection(u.hostname, u.port, timeout=12)
+    c.request("GET", f"/cdn/{secret}{suffix}", headers={
+        "Host": u.netloc, "Upgrade": "websocket", "Connection": "Upgrade",
+        "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==", "Sec-WebSocket-Version": "13"
+    })
+    r = c.getresponse()
+    assert r.status == 101, f"{label} WebSocket upgrade returned HTTP {r.status}"
+    c.close()
+    print(f"[smoke] Nginx -> Xray {label} WebSocket handshake: OK")
 PY
 
 # Stop and recreate the container against the SAME named volume.
@@ -203,6 +207,7 @@ docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
   -v "$AUTO_VOLUME:/var/lib/marzban" \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="$AUTO_BASE" \
+  -e PANEL_DOMAIN="ci.example.net" \
   "$IMAGE" >/dev/null
 AUTO_HEALTHY=0
 for _ in $(seq 1 120); do
@@ -230,6 +235,7 @@ docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
   -v "$AUTO_VOLUME:/var/lib/marzban" \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="$AUTO_BASE" \
+  -e PANEL_DOMAIN="ci.example.net" \
   "$IMAGE" >/dev/null
 AUTO_HEALTHY=0
 for _ in $(seq 1 120); do
