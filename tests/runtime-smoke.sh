@@ -5,6 +5,7 @@ set -Eeuo pipefail
 
 IMAGE="${1:-pompnet-super-jinx:ci}"
 NAME="pompnet-jinx-smoke"
+RESET_NAME="pompnet-jinx-reset-admin"
 VOLUME="pompnet-jinx-smoke-data"
 BASE="http://127.0.0.1:18080"
 ADMIN="ciadmin"
@@ -16,7 +17,7 @@ AUTO_VOLUME="pompnet-jinx-auto-admin-data"
 AUTO_BASE="http://127.0.0.1:18081"
 
 cleanup() {
-  docker rm -f "$NAME" "$AUTO_NAME" >/dev/null 2>&1 || true
+  docker rm -f "$NAME" "$AUTO_NAME" "$RESET_NAME" >/dev/null 2>&1 || true
   docker volume rm "$VOLUME" "$AUTO_VOLUME" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
@@ -199,3 +200,31 @@ curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   --data-urlencode "username=admin" \
   --data-urlencode "password=$AUTO_PASSWORD" \
   | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
+
+# Existing admin recovery path: explicit reset flag rotates the existing owner
+# to a fresh strong password without requiring the old password or a weak default.
+docker run -d --name "$RESET_NAME" \
+  -p 127.0.0.1:18082:8080 \
+  -v "$VOLUME:/var/lib/marzban" \
+  -e ADMIN_USERNAME="$ADMIN" \
+  -e RESET_ADMIN_PASSWORD=1 \
+  -e XRAY_SUBSCRIPTION_URL_PREFIX="http://127.0.0.1:18082" \
+  "$IMAGE" >/dev/null
+for _ in $(seq 1 120); do
+  RESET_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:18082/health" 2>/dev/null || true)"
+  if [[ "$RESET_STATUS" == "200" ]]; then break; fi
+  if ! docker inspect -f '{{.State.Running}}' "$RESET_NAME" 2>/dev/null | grep -q true; then
+    docker logs "$RESET_NAME" || true
+    echo "Admin recovery container exited" >&2
+    exit 1
+  fi
+  sleep 2
+done
+RESET_LINE="$(docker logs "$RESET_NAME" 2>&1 | grep -m1 'ONE-TIME LOGIN' || true)"
+RESET_PASSWORD="$(printf '%s' "$RESET_LINE" | sed -n 's/.*password: //p' | tr -d '\\r')"
+test -n "$RESET_PASSWORD" || { echo "Admin recovery did not emit a one-time password" >&2; exit 1; }
+curl --fail --silent --show-error -X POST "http://127.0.0.1:18082/api/admin/token" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode "username=$ADMIN" \
+  --data-urlencode "password=$RESET_PASSWORD" \
+  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] explicit existing-admin password recovery: OK")'
