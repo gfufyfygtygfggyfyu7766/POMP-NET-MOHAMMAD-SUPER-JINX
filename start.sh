@@ -67,7 +67,19 @@ json.dump(b, open("/var/lib/marzban/xray_config.json", "w"), ensure_ascii=False,
 PY
 fi
 
-PUBLIC_DOMAIN="${PANEL_DOMAIN:-${RAILWAY_PUBLIC_DOMAIN:-$CF_TUNNEL_HOSTNAME}}"
+# Never use documentation placeholders such as panel.example.com in generated subscriptions.
+PANEL_DOMAIN_CANDIDATE="${PANEL_DOMAIN:-}"
+case "${PANEL_DOMAIN_CANDIDATE,,}" in
+  ""|example.com|*.example.com)
+    PUBLIC_DOMAIN="${RAILWAY_PUBLIC_DOMAIN:-$CF_TUNNEL_HOSTNAME}"
+    ;;
+  *)
+    PUBLIC_DOMAIN="$PANEL_DOMAIN_CANDIDATE"
+    ;;
+esac
+case "${PUBLIC_DOMAIN,,}" in
+  example.com|*.example.com) PUBLIC_DOMAIN="";;
+esac
 if [ -n "$PUBLIC_DOMAIN" ]; then
   # Railway terminates public TLS on its generated HTTPS domain and forwards HTTP to PORT=8080.
   # Subscription URLs must use the public hostname without an internal or TCP-proxy port.
