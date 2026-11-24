@@ -1762,9 +1762,13 @@
     b.addEventListener("click",function(){location.href="/bot/";});
     menu.appendChild(b);
   }
-  function scan(){owner().then(function(ok){if(!ok)return;document.querySelectorAll('[role="menu"]').forEach(add);});}
+  var ownerOk=null, checking=false;
+  function scan(){
+    if(ownerOk===true){document.querySelectorAll('[role="menu"]').forEach(add);return;}
+    if(ownerOk===false||checking)return; checking=true;
+    owner().then(function(ok){ownerOk=ok;checking=false;if(ok)document.querySelectorAll('[role="menu"]').forEach(add);});
+  }
   var mo=new MutationObserver(function(){if(document.querySelector('[role="menu"]'))scan();});
   function boot(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});scan();}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-  setInterval(scan,1800);
 })();
