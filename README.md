@@ -2,8 +2,8 @@
 
 <img src="assets/pompnet-super-jinx-hero.svg" alt="POMP NET MOHAMMAD — SUPER JINX" width="100%"/>
 
-# POMP NET MOHAMMAD
-### SUPER JINX · پنل مدیریت اختصاصی
+<h1 style="font-size:2.8em;letter-spacing:2px">POMP NET MOHAMMAD</h1>
+<p><sub>SUPER JINX · پنل مدیریت اختصاصی</sub></p>
 
 **قدرت ساخت، آزادی انتخاب، کنترل در دستان تو**
 
