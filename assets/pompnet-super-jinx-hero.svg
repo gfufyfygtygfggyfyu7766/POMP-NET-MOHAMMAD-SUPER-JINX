@@ -11,11 +11,11 @@
 <ellipse cx="1040" cy="350" rx="300" ry="230" fill="url(#glow)" filter="url(#soft)"/>
 <rect x="24" y="24" width="1152" height="372" rx="28" fill="none" stroke="url(#edge)" stroke-opacity=".62" stroke-width="2"/>
 <path d="M65 340 C290 255 390 375 610 310 S940 260 1135 180" fill="none" stroke="url(#edge)" stroke-width="2.5" opacity=".55"/>
-<g transform="translate(600 96)">
+<g transform="translate(600 78)">
  <path d="M-28 -27 L0 -44 L28 -27 L28 17 L0 35 L-28 17 Z" fill="#0E0B18" stroke="url(#edge)" stroke-width="3"/>
  <path d="M-11 15 V-18 H7 Q21 -18 21 -4 Q21 9 7 9 H-11" fill="none" stroke="url(#word)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
-<text x="600" y="220" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="70" font-weight="900" letter-spacing="2">POMP NET MOHAMMAD</text>
-<text x="600" y="273" text-anchor="middle" fill="url(#word)" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="4">SUPER JINX</text>
-<text x="600" y="333" text-anchor="middle" fill="#B8B2CC" font-family="Arial,sans-serif" font-size="19">قدرت ساخت، آزادی انتخاب، کنترل در دستان تو</text>
+<text x="600" y="220" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="88" font-weight="900" letter-spacing="3">POMP NET MOHAMMAD</text>
+<text x="600" y="270" text-anchor="middle" fill="url(#word)" font-family="Arial,sans-serif" font-size="19" font-weight="800" letter-spacing="7">SUPER JINX</text>
+<text x="600" y="329" text-anchor="middle" fill="#B8B2CC" font-family="Arial,sans-serif" font-size="18">قدرت ساخت، آزادی انتخاب، کنترل در دستان تو</text>
 </svg>
