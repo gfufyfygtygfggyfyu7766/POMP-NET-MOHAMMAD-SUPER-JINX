@@ -38,7 +38,7 @@ RUN mkdir -p /opt/jinx/fonts \
 COPY start.sh /start.sh
 
 # fix Windows line endings, just in case
-RUN sed -i 's/\r$//' /start.sh /opt/*.py /opt/*.json /opt/jinx/jinx.css /opt/jinx/jinx.js /opt/jinx/donate.html /opt/jinx/donate-config.js /opt/jinx/templates/subscription/index.html /opt/jinx/sub.golden.html /opt/jinx/donate.golden.html /opt/jinx/donate-config.golden.js /etc/nginx/ws.inc /etc/nginx/gate.inc /etc/nginx/conf.d/marzban.conf /opt/jinx/nginx.conf.tpl \
+RUN sed -i 's/\r$//' /start.sh /opt/*.py /opt/*.json /opt/jinx/jinx.css /opt/jinx/jinx.js /opt/jinx/pompnet-motion.css /opt/jinx/pompnet-motion.js /opt/jinx/donate.html /opt/jinx/donate-config.js /opt/jinx/templates/subscription/index.html /opt/jinx/sub.golden.html /opt/jinx/donate.golden.html /opt/jinx/donate-config.golden.js /etc/nginx/ws.inc /etc/nginx/gate.inc /etc/nginx/conf.d/marzban.conf /opt/jinx/nginx.conf.tpl \
  && chmod +x /start.sh && chmod -R a+rX /opt/jinx
 
 ENV PORT=8080 \
