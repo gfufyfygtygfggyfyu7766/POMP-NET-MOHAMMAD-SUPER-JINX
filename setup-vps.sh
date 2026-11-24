@@ -49,7 +49,7 @@ if not re.fullmatch(r"(?=.{4,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9
 PY
 
 # The owner account name is fixed by ensure_admin.py and must match the login UI.
-ADMIN="admin"
+ADMIN="ADMIN_tanel9990"
 PASSWORD="$(openssl rand -base64 36 | tr -d '\n')"
 
 umask 077
