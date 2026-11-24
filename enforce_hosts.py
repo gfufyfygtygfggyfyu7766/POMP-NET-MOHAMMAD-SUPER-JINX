@@ -4,7 +4,7 @@
 #    as long as they still look like ours. Rename a host in the panel and the guard leaves it alone.
 # Every config name starts with the locked brand name, then shows its route and protocol, e.g.
 #   جینکس | 𝗝𝗶𝗻𝗫 ✦ 🚀 Turbo Iran · VLESS      (the apps still pick the fastest one with their ping test)
-import json, os, time, urllib.error, urllib.request, urllib.parse
+import json, os, re as _re, time, urllib.error, urllib.request, urllib.parse
 
 API = "http://127.0.0.1:8000"
 LOCKED_TAG = json.load(open("/opt/locked_inbound.json"))["tag"]
@@ -61,7 +61,6 @@ except Exception:
 FRAG = os.environ.get("JINX_FRAGMENT", "").strip()   # off by default: standard links are more compatible with v2rayNG and Hiddify
 # 🔐 secret path /cdn/<random id> + ?ed=2560 early data: exactly the SuperJinX config style
 #    (vless://...@<app>.up.railway.app:443?type=ws&security=tls&path=/cdn/<id>?ed=2560&alpn=http/1.1&fp=ios)
-import re as _re
 def _ws_base():
     b = (os.environ.get("JINX_WS_BASE") or "").strip()
     if not _re.fullmatch(r"/cdn/[A-Za-z0-9-]{8,64}", b):
