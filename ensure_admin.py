@@ -53,69 +53,51 @@ else:
     STORE_BROKEN = _seen
 
 with GetDB() as db:
-    panel_admins = [a for a in db.query(Admin).all() if a.username != SYSTEM]
-    owners = [a for a in panel_admins if a.username not in RESELLERS]
-    sudo = [a for a in owners if a.is_sudo]
+    panel_admins = [x for x in db.query(Admin).all() if x.username != SYSTEM]
+    owners = [x for x in panel_admins if x.username not in RESELLERS]
+
     if STORE_BROKEN:
-        msg = "[admin] WARNING: reseller data unreadable -> admin roles left exactly as they are this start"
-    elif not owners:
-        if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
-            db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
-            try:
-                fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-                with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                    _f.write("completed\n")
-                    _f.flush()
-                    os.fsync(_f.fileno())
-            except FileExistsError:
-                pass
-            msg = f"[admin] first install: explicit admin credentials configured for {ADMIN}"
-        else:
-            msg = "[admin] WARNING: only reseller admins exist; rename the conflicting reseller account to recover"
-    elif not os.path.exists(ADMIN_RECOVERY_MARKER):
-        taken_by_reseller = any(x.username == ADMIN for x in panel_admins if x.username in RESELLERS)
-        if taken_by_reseller:
-            print("[admin] FATAL: username ADMIN_tanel9990 belongs to a reseller; rename that reseller before recovery", flush=True)
+        print("[admin] WARNING: reseller data unreadable; existing owner accounts left unchanged", flush=True)
+    else:
+        reseller_conflict = any(x.username == ADMIN for x in panel_admins if x.username in RESELLERS)
+        if reseller_conflict:
+            print(f"[admin] FATAL: {ADMIN} is assigned to a reseller; rename that reseller account first", flush=True)
             sys.exit(1)
-        a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
-        a.username = ADMIN
-        set_pw(a, DEFAULT_PW)
+
+        if not owners:
+            existing = db.query(Admin).filter(Admin.username == ADMIN).first()
+            if existing is None:
+                db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
+                print(f"[admin] created owner account {ADMIN}", flush=True)
+            else:
+                print("[admin] FATAL: no owner account is available; refusing to overwrite reseller access", flush=True)
+                sys.exit(1)
+        else:
+            owner = next((x for x in owners if x.username == ADMIN), None) or next((x for x in owners if x.is_sudo), owners[0])
+            conflict = any(x.username == ADMIN and x is not owner for x in panel_admins)
+            if conflict:
+                print(f"[admin] FATAL: username {ADMIN} is already in use by another account", flush=True)
+                sys.exit(1)
+            owner.username = ADMIN
+            set_pw(owner, DEFAULT_PW)
+            print(f"[admin] configured fixed owner credentials for {ADMIN}", flush=True)
+
         try:
-            fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                _f.write("completed\n")
-                _f.flush()
-                os.fsync(_f.fileno())
-        except FileExistsError:
-            pass
-        msg = f"[admin] one-time recovery applied for {ADMIN}"
-    else:
-        a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
-        taken = any(x.username == ADMIN and x is not a for x in panel_admins)
-        if not taken:
-            a.username = ADMIN
-        set_pw(a, DEFAULT_PW)
-        msg = f"[admin] fixed owner credentials enforced for {a.username}"
-    else:
-        if not sudo:
-            owners[0].is_sudo = True
-            sys_pw = secrets.token_urlsafe(24)
-    s = db.query(Admin).filter(Admin.username == SYSTEM).first()
-    if s is None:
+            fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as marker:
+                marker.write("completed\\n")
+                marker.flush()
+                os.fsync(marker.fileno())
+        except OSError as e:
+            print(f"[admin] WARNING: could not save recovery marker: {e}", flush=True)
+
+    sys_pw = secrets.token_urlsafe(24)
+    system_admin = db.query(Admin).filter(Admin.username == SYSTEM).first()
+    if system_admin is None:
         db.add(Admin(username=SYSTEM, hashed_password=pwd.hash(sys_pw), is_sudo=True))
     else:
-        set_pw(s, sys_pw)
+        set_pw(system_admin, sys_pw)
     db.commit()
-    if not STORE_BROKEN:
-        try:
-            fd = os.open(DEFAULT_ADMIN_APPLIED, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-            with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                _f.write(ADMIN + "\n")
-                _f.flush()
-                os.fsync(_f.fileno())
-        except OSError as e:
-            print(f"[admin] WARNING: could not save default-admin marker: {e}", flush=True)
-    print(msg, flush=True)
 
 os.makedirs("/run/jinx", exist_ok=True)
 _tmp = CRED + ".tmp"
