@@ -608,3 +608,12 @@ html,body,.chakra-ui-dark,[data-theme=dark]{color:#f7f5ff!important}
 .chakra-ui-dark .chakra-modal__overlay,[data-theme=dark] .chakra-modal__overlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 @media(max-width:768px){body{background-attachment:scroll!important}.chakra-card,.chakra-modal__content,.chakra-menu__menu-list{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Small glass attribution above authenticated dashboard content; no login-page placement. */
+.pompnet-panel-credit{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:calc(100% - 24px);margin:12px auto 16px;padding:7px 13px;overflow:hidden;border:1px solid rgba(139,53,255,.42);border-radius:999px;background:linear-gradient(110deg,rgba(20,14,35,.92),rgba(8,20,36,.9));color:#d8d0e9;font:600 10px/1.8 Vazirmatn,Tahoma,sans-serif;box-shadow:0 8px 25px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:2}
+.pompnet-panel-credit:before{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent);animation:pnPanelCreditShine 5s ease-in-out infinite}
+.pompnet-panel-credit b{color:#fff;font-weight:800}.pompnet-panel-credit i{font-style:normal;color:#a879ff;text-shadow:0 0 10px #8b35ff}.pompnet-panel-credit>span:last-child{color:#b8cfff}.pompnet-panel-credit .pnpc-dot{width:6px;height:6px;border-radius:50%;background:#168cff;box-shadow:0 0 10px #168cff;flex:none}
+@keyframes pnPanelCreditShine{55%,100%{transform:translateX(120%)}}
+@media(max-width:560px){.pompnet-panel-credit{font-size:9px;padding:6px 10px;gap:6px;margin:9px auto 12px}}
+@media(prefers-reduced-motion:reduce){.pompnet-panel-credit:before{animation:none}}
