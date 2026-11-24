@@ -14,6 +14,7 @@ services:
       PANEL_DOMAIN: ${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
       ADMIN_USERNAME: ${ADMIN_USERNAME:?Set ADMIN_USERNAME in .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      RESET_ADMIN_PASSWORD: ${RESET_ADMIN_PASSWORD:-}
       XRAY_SUBSCRIPTION_URL_PREFIX: https://${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}:2096
       SQLALCHEMY_DATABASE_URL: sqlite:////var/lib/marzban/db.sqlite3
       XRAY_JSON: /var/lib/marzban/xray_config.json
