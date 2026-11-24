@@ -224,6 +224,7 @@ trap 'kill -TERM $MAIN 2>/dev/null; wait $MAIN; exit 0' TERM INT
 ( set +e; while true; do python /opt/jinx_api.py; echo "[account] restarting in 2s"; sleep 2; done ) &
 ( set +e; while true; do python /opt/enforce_hosts.py; echo "[guard] restarting in 5s"; sleep 5; done ) &
 ( set +e; while true; do python /opt/doctor.py; echo "[doctor] restarting in 5s"; sleep 5; done ) &
+( set +e; while true; do python /opt/pompnet_telegram_bot.py; echo "[bot] worker restarting in 5s"; sleep 5; done ) &
 
 set +e
 wait "$MAIN"
