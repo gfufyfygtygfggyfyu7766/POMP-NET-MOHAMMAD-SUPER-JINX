@@ -91,15 +91,37 @@ with GetDB() as db:
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
     elif RESET:
-        if len(ADMIN) < 3 or len(DEFAULT_PW) < 14:
-            print("[admin] FATAL: password reset requires ADMIN_USERNAME (3+ chars) and ADMIN_PASSWORD (14+ chars)", flush=True)
+        if len(ADMIN) < 3:
+            print("[admin] FATAL: ADMIN_USERNAME must contain at least 3 characters", flush=True)
+            sys.exit(1)
+        # A controlled recovery is possible even when the old password is unknown:
+        # set RESET_ADMIN_PASSWORD=1. If ADMIN_PASSWORD is absent, create one strong
+        # password, persist it with mode 0600, and print it once to deploy logs.
+        generated = False
+        if not DEFAULT_PW:
+            try:
+                with open(FIRST_LOGIN_FILE, encoding="utf-8") as _f:
+                    DEFAULT_PW = _f.read().strip()
+            except OSError:
+                DEFAULT_PW = secrets.token_urlsafe(32)
+                generated = True
+                os.makedirs(os.path.dirname(FIRST_LOGIN_FILE), exist_ok=True)
+                fd = os.open(FIRST_LOGIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                    _f.write(DEFAULT_PW)
+                    _f.flush()
+                    os.fsync(_f.fileno())
+        if len(DEFAULT_PW) < 14:
+            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters", flush=True)
             sys.exit(1)
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         taken = any(x.username == ADMIN and x is not a for x in panel_admins)   # 'admin' used by a reseller
         if not taken:
             a.username = ADMIN
         set_pw(a, DEFAULT_PW)
-        msg = (f"[admin] RESET_ADMIN_PASSWORD -> credentials rotated for {a.username} (remove reset variable now)")
+        if generated:
+            print(f"[admin] ONE-TIME LOGIN -> username: {a.username} | password: {DEFAULT_PW}", flush=True)
+        msg = (f"[admin] credentials rotated for {a.username}; remove RESET_ADMIN_PASSWORD after successful login")
     else:
         if not sudo:
             owners[0].is_sudo = True
