@@ -8,7 +8,7 @@ NAME="pompnet-jinx-smoke"
 RESET_NAME="pompnet-jinx-reset-admin"
 VOLUME="pompnet-jinx-smoke-data"
 BASE="http://127.0.0.1:18080"
-ADMIN="ciadmin"
+ADMIN="admin"
 PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 USER="jinx_ci_smoke"
 
