@@ -640,7 +640,7 @@ var JinxCoinIcon = {
   var brand = function () { return esc(S.cfg.brand || "Super JinX"); };
   J.topHtml = function () { return '<header class="top"><div class="brand"><span class="mark ltr">SJ</span><span><b>' + brand() + __T('</b><small>Donation · حمایت مالی</small></span></div><div class="tr">') +
     (S.mode === "D" ? '<span class="status"><i></i><span class="ltr">' + S.good.length + "/" + S.coins.length + __T("</span> آدرس تأییدشده</span>") : "") + (/^\/(donate|jinx-api\/donate)/.test(location.pathname) ? __T('<a class="ib back" href="/dashboard/" aria-label="بازگشت به پنل" title="بازگشت به پنل">') + ic("arrow") + "</a>" : "") + '<button type="button" class="ib thm"></button></div></header>'; };
-  J.bankSupportHtml = function () { var cfg=S.cfg||{}; if(!/^\d{16}$/.test(cfg.bankCard||"")) return ""; return '<section class="bank-support"><span class="bs-kicker">POMP NET MOHAMMAD · SUPPORT</span><h2>حمایت از مسیر پمپ‌نت</h2><p>'+esc(cfg.bankIntro||"با همراهی شما توسعه ادامه پیدا می‌کند.")+'</p><div class="bs-owner">به نام '+esc(cfg.supportName||"آقای محمدی")+'</div><div class="bs-card"><strong class="bs-number">'+esc(cfg.bankCard)+'</strong><button type="button" id="copyBankCard">کپی شماره کارت</button></div><div class="bs-note">پیش از انتقال وجه، نام صاحب کارت را در اپلیکیشن بانکی بررسی کنید.</div></section>'; };
+  J.bankSupportHtml = function () { var cfg=S.cfg||{}; if(!/^\d{16}$/.test(cfg.bankCard||"")) return ""; return '<section class="bank-support"><h2>حمایت پروژه</h2><div class="bs-card"><strong class="bs-number">'+esc(cfg.bankCard)+'</strong><button type="button" id="copyBankCard">کپی شماره کارت</button></div></section>'; };
   J.introHtml = function () { return __T('<section class="intro"><div><span class="eyebrow">Support the project</span><h1>حمایت از توسعه‌ی <span class="ltr">') + brand() + "</span></h1><p>" + esc((window.__L === "en" && S.cfg.intro_en) || S.cfg.intro || "") + "</p></div>" +
     __T('<dl class="facts"><div><dt>ارزهای فعال</dt><dd class="mono ltr">') + S.good.length + __T('</dd></div><div><dt>شبکه‌ها</dt><dd class="mono ltr">') + J.nets() + __T('</dd></div><div><dt>اعتبارسنجی</dt><dd class="mono ltr">Checksum · On-device</dd></div><div><dt>واسطه</dt><dd>ندارد؛ مستقیم به کیف پول</dd></div></dl></section>'); };
   J.rowsHtml = function () { return S.coins.map(function (c) {
@@ -897,8 +897,9 @@ var JinxCoinIcon = {
   function fab() { if ($("#fab") || !S.good.length) return; var f = document.createElement("button"); f.type = "button"; f.className = "fab"; f.id = "fab"; f.setAttribute("aria-haspopup", "dialog"); f.setAttribute("aria-expanded", "false"); f.setAttribute("aria-label", __T("پشتیبان JinX Care")); f.innerHTML = J.ic("chat") + __T("<span>پشتیبان JinX Care</span><i></i>");
     f.onclick = function () { J.bot.isOpen() ? J.bot.close() : J.bot.open(); }; document.body.appendChild(f); }
   function mount() { var m = mq.matches ? "D" : "M"; if (m === S.mode) return; S.mode = m; J.closeSheet(true); if (J.bot.isOpen()) J.bot.close();
-    document.body.className = m; $("#app").innerHTML = m === "D" ? J.renderDesk() : J.renderMob(); J.theme(root.getAttribute("data-theme")); wire(); fab();
-    if (!S.good.length) { $("#detail").innerHTML = '<div class="db"><div class="note">' + J.ic("alert") + __T("<span>در حال حاضر آدرس معتبری برای نمایش وجود ندارد.</span></div></div>"); return; }
+    document.body.className = m;
+    if (!S.good.length) { $("#app").innerHTML = '<div class="wrap">' + J.topHtml() + J.bankSupportHtml() + '</div>'; J.theme(root.getAttribute("data-theme")); wire(); return; }
+    $("#app").innerHTML = m === "D" ? J.renderDesk() : J.renderMob(); J.theme(root.getAttribute("data-theme")); wire(); fab();
     var c = S.cur || J.byId(location.hash.slice(1)); J.select(c && c.ok ? c : S.good[0], "force"); J.heal(); }
   J.start = function () { var t = null; try { t = localStorage.getItem("jinx-don-theme") || localStorage.getItem("chakra-ui-color-mode"); } catch (e) {} root.setAttribute("data-theme", t === "light" ? "light" : "dark"); mount();
     mq.addEventListener ? mq.addEventListener("change", mount) : mq.addListener(mount);
