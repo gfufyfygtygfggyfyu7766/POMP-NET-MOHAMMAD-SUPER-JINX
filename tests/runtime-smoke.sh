@@ -147,7 +147,6 @@ docker volume create "$AUTO_VOLUME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
   -v "$AUTO_VOLUME:/var/lib/marzban" \
-  -e ADMIN_PASSWORD=admin -e ALLOW_INSECURE_ADMIN_PASSWORD=1 \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="$AUTO_BASE" \
   "$IMAGE" >/dev/null
 AUTO_HEALTHY=0
@@ -163,13 +162,18 @@ for _ in $(seq 1 120); do
 done
 test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin fresh install did not become healthy" >&2; exit 1; }
 
+AUTO_LOGS="$(docker logs "$AUTO_NAME" 2>&1)"
+AUTO_PASSWORD="$(printf "%s\\n" "$AUTO_LOGS" | grep "ONE-TIME LOGIN" | tail -n 1 | sed "s/.*password: //")"
+test -n "$AUTO_PASSWORD" || { echo "No one-time password was generated" >&2; docker logs "$AUTO_NAME"; exit 1; }
+test "$AUTO_PASSWORD" != "admin"
+test "$(printf "%s" "$AUTO_PASSWORD" | wc -c)" -ge 32
 AUTO_TOKEN="$(curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "username=admin" \
-  --data-urlencode "password=admin" \
+  --data-urlencode "password=$AUTO_PASSWORD" \
   | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 test -n "$AUTO_TOKEN"
-echo "[smoke] fresh-install admin/admin login: OK"
+echo "[smoke] generated strong one-time admin password login: OK"
 
 docker rm -f "$AUTO_NAME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
@@ -192,8 +196,8 @@ test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-
 curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "username=admin" \
-  --data-urlencode "password=admin" \
-  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] admin/admin credential persists across container recreation: OK")'
+  --data-urlencode "password=$AUTO_PASSWORD" \
+  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
 
 # Existing admin recovery path: the one-time migration marker upgrades the existing owner to admin/admin.
 # Stop the previous container first; never mount the same SQLite volume twice.
