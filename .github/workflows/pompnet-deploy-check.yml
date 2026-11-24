@@ -65,3 +65,38 @@ jobs:
 
       - name: Build the actual Railway Docker image
         run: docker build --pull --tag pompnet-mohammad:ci .
+
+      # Start the exact image as Railway will, then exercise the public HTTP routes.
+      # This catches startup, Nginx, Marzban and Xray failures before a deploy is considered green.
+      - name: Runtime smoke test (panel + Xray)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker run -d --name pompnet-smoke -p 18080:8080 pompnet-mohammad:ci
+          cleanup() { docker logs pompnet-smoke || true; docker rm -f pompnet-smoke >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:18080/health >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != "1" ]; then
+            echo "Panel did not become healthy within 180 seconds"
+            exit 1
+          fi
+
+          # Dashboard must be served, and the admin token route must reach the real API
+          # (422 for an empty form is acceptable; 404/502 means routing is broken).
+          dashboard_code=$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/dashboard/)
+          [ "$dashboard_code" = "200" ] || { echo "Dashboard returned HTTP $dashboard_code"; exit 1; }
+
+          token_code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:18080/api/admin/token)
+          case "$token_code" in 400|401|422) ;; *) echo "Admin API route returned unexpected HTTP $token_code"; exit 1 ;; esac
+
+          docker exec pompnet-smoke sh -lc 'pgrep -af "[x]ray" >/dev/null'
+          docker exec pompnet-smoke python -c 'import json; c=json.load(open("/var/lib/marzban/xray_config.json")); assert c.get("inbounds"), "No active Xray inbounds"; print("Runtime Xray inbounds:", len(c["inbounds"]))'
+          echo "Runtime smoke test passed: panel HTTP routes and Xray process are up."
