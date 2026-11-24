@@ -592,3 +592,19 @@ input, textarea, select, .chakra-input, .chakra-select, .chakra-textarea {
 }
 /* Login form containers are intentionally opaque black, not translucent glass. */
 form, [class*="login"], [class*="Login"] { color:#f5f3ff; }
+
+/* POMP NET legibility and mobile performance overrides */
+:root{--chakra-colors-brand-50:#f3eaff;--chakra-colors-brand-100:#e4d2ff;--chakra-colors-brand-200:#c9a8ff;--chakra-colors-brand-300:#ad7dff;--chakra-colors-brand-400:#963cff;--chakra-colors-brand-500:#8b35ff;--chakra-colors-brand-600:#7130d6;--chakra-colors-brand-700:#5420a8}
+html,body,.chakra-ui-dark,[data-theme=dark]{color:#f7f5ff!important}
+.chakra-ui-dark p,.chakra-ui-dark label,.chakra-ui-dark th,.chakra-ui-dark td,[data-theme=dark] p,[data-theme=dark] label,[data-theme=dark] th,[data-theme=dark] td{color:#eeeaf8!important}
+.chakra-ui-dark small,.chakra-ui-dark .chakra-form__helper-text,[data-theme=dark] small,[data-theme=dark] .chakra-form__helper-text{color:#c2bdd1!important}
+.chakra-ui-dark .chakra-input,.chakra-ui-dark .chakra-select,.chakra-ui-dark .chakra-textarea,[data-theme=dark] .chakra-input,[data-theme=dark] .chakra-select,[data-theme=dark] .chakra-textarea{color:#fff!important;background:#090912!important;border-color:#51446d!important}
+.chakra-ui-dark .chakra-input::placeholder,.chakra-ui-dark .chakra-textarea::placeholder,[data-theme=dark] .chakra-input::placeholder,[data-theme=dark] .chakra-textarea::placeholder{color:#aaa3bb!important;opacity:1!important}
+.chakra-ui-dark .chakra-table thead th,[data-theme=dark] .chakra-table thead th{color:#eee8ff!important;background:#171326!important}
+.chakra-ui-dark .chakra-table tbody td,[data-theme=dark] .chakra-table tbody td{color:#eeeaf8!important}
+.chakra-ui-dark a,[data-theme=dark] a{color:#9bcaff}
+.chakra-ui-dark .chakra-card,.chakra-ui-dark .chakra-modal__content,[data-theme=dark] .chakra-card,[data-theme=dark] .chakra-modal__content{background:#10101a!important;border-color:#3b2b58!important;box-shadow:0 10px 26px rgba(0,0,0,.28)!important}
+.chakra-ui-dark .chakra-card:hover,[data-theme=dark] .chakra-card:hover{transform:none!important}
+.chakra-ui-dark .chakra-modal__overlay,[data-theme=dark] .chakra-modal__overlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:768px){body{background-attachment:scroll!important}.chakra-card,.chakra-modal__content,.chakra-menu__menu-list{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
