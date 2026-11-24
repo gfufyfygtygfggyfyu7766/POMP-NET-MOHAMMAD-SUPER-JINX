@@ -291,6 +291,8 @@ html[dir=ltr] .qrw{border-left:0;border-right:1px solid var(--line)}html[dir=ltr
 html[dir=ltr] .M .kv div+div,html[dir=ltr] .M .proc div+div{border-left:0}
 html[dir=ltr] .msg.b{border-top-right-radius:12px;border-top-left-radius:4px}html[dir=ltr] .msg.u{border-top-left-radius:12px;border-top-right-radius:4px}
 html[dir=ltr] .msg ul{padding-right:0;padding-left:16px}html[dir=ltr] .back .ico{transform:none}html[dir=ltr] .chev{transform:scaleX(-1)}html[dir=ltr] .row[aria-checked=true] .chev{transform:scaleX(-1) translateX(-3px)}
+/* POMP NET bank support card */
+.bank-support{margin:26px 0 30px;padding:22px;border:1px solid rgba(139,53,255,.42);border-radius:18px;background:radial-gradient(ellipse at 8% 0%,rgba(22,140,255,.15),transparent 48%),linear-gradient(135deg,#171126,#0b1020);box-shadow:0 18px 45px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.06)}.bank-support .bs-kicker{font-size:11px;letter-spacing:1.5px;color:#c4a2ff}.bank-support h2{font-size:20px;margin:6px 0;color:#fff}.bank-support p{font-size:13px;color:#c2bbd3;line-height:2}.bank-support .bs-owner{font-size:12px;color:#b5d8ff;margin-top:12px}.bank-support .bs-card{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:15px;padding:14px;border:1px solid rgba(139,53,255,.35);border-radius:12px;background:#070812}.bank-support .bs-number{font:700 20px/1.7 ui-monospace,monospace;letter-spacing:1px;color:#fff;direction:ltr;unicode-bidi:isolate}.bank-support button{padding:9px 15px;border-radius:9px;background:linear-gradient(110deg,#8b35ff,#168cff);color:#fff;font-weight:700}.bank-support .bs-note{font-size:11px;color:#8f89a3;margin-top:9px}
 </style>
 </head>
 <body>
@@ -638,6 +640,7 @@ var JinxCoinIcon = {
   var brand = function () { return esc(S.cfg.brand || "Super JinX"); };
   J.topHtml = function () { return '<header class="top"><div class="brand"><span class="mark ltr">SJ</span><span><b>' + brand() + __T('</b><small>Donation · حمایت مالی</small></span></div><div class="tr">') +
     (S.mode === "D" ? '<span class="status"><i></i><span class="ltr">' + S.good.length + "/" + S.coins.length + __T("</span> آدرس تأییدشده</span>") : "") + (/^\/(donate|jinx-api\/donate)/.test(location.pathname) ? __T('<a class="ib back" href="/dashboard/" aria-label="بازگشت به پنل" title="بازگشت به پنل">') + ic("arrow") + "</a>" : "") + '<button type="button" class="ib thm"></button></div></header>'; };
+  J.bankSupportHtml = function () { var cfg=S.cfg||{}; if(!/^\\d{16}$/.test(cfg.bankCard||"")) return ""; return '<section class="bank-support"><span class="bs-kicker">POMP NET MOHAMMAD · SUPPORT</span><h2>حمایت از مسیر پمپ‌نت</h2><p>'+esc(cfg.bankIntro||"با همراهی شما توسعه ادامه پیدا می‌کند.")+'</p><div class="bs-owner">به نام '+esc(cfg.supportName||"آقای محمدی")+'</div><div class="bs-card"><strong class="bs-number">'+esc(cfg.bankCard)+'</strong><button type="button" id="copyBankCard">کپی شماره کارت</button></div><div class="bs-note">پیش از انتقال وجه، نام صاحب کارت را در اپلیکیشن بانکی بررسی کنید.</div></section>'; };
   J.introHtml = function () { return __T('<section class="intro"><div><span class="eyebrow">Support the project</span><h1>حمایت از توسعه‌ی <span class="ltr">') + brand() + "</span></h1><p>" + esc((window.__L === "en" && S.cfg.intro_en) || S.cfg.intro || "") + "</p></div>" +
     __T('<dl class="facts"><div><dt>ارزهای فعال</dt><dd class="mono ltr">') + S.good.length + __T('</dd></div><div><dt>شبکه‌ها</dt><dd class="mono ltr">') + J.nets() + __T('</dd></div><div><dt>اعتبارسنجی</dt><dd class="mono ltr">Checksum · On-device</dd></div><div><dt>واسطه</dt><dd>ندارد؛ مستقیم به کیف پول</dd></div></dl></section>'); };
   J.rowsHtml = function () { return S.coins.map(function (c) {
@@ -649,7 +652,7 @@ var JinxCoinIcon = {
   J.footHtml = function () { return '<footer class="foot"><span>© <span class="ltr">' + new Date().getFullYear() + " " + brand() + __T("</span> · با سپاس از حمایت شما</span>") +
     (/^https:\/\//.test(S.cfg.channel || "") ? '<a href="' + esc(S.cfg.channel) + __T('" target="_blank" rel="noopener noreferrer">کانال رسمی</a>') : "") + "</footer>"; };
   /* ---------- desktop ---------- */
-  J.renderDesk = function () { return '<div class="wrap">' + J.topHtml() + J.introHtml() +
+  J.renderDesk = function () { return '<div class="wrap">' + J.topHtml() + J.introHtml() + J.bankSupportHtml() +
     __T('<div class="desk"><aside class="side"><div class="lh"><span>دارایی‌ها</span><b class="ltr">') + S.good.length + __T(" Assets</b></div><div class=\"list\" id=\"list\" role=\"radiogroup\" aria-label=\"ارزها\">") + J.rowsHtml() + "</div></aside>" +
     '<article class="detail" id="detail" aria-live="polite"></article></div>' + J.procHtml() + J.footHtml() + "</div>"; };
   J.updateDesk = function (c) { var q = J.qrHtml(c);
@@ -903,6 +906,7 @@ var JinxCoinIcon = {
     /* copying by hand from the address box always gives the exact address (no spaces / line breaks between groups) */
     document.addEventListener("copy", function (e) { try { var s = getSelection(); if (!s || !s.rangeCount || !S.cur) return; var n = s.anchorNode, el = n && (n.nodeType === 1 ? n : n.parentElement);
       if (el && el.closest && el.closest(".addr,.wc-addr") && e.clipboardData) { e.clipboardData.setData("text/plain", S.cur.address); e.preventDefault(); J.toast(__T("آدرس ") + S.cur.symbol + __T(" کپی شد")); } } catch (x) {} });
+    document.addEventListener("click",function(e){var b=e.target.closest("#copyBankCard");if(!b)return;var v=(window.JINX_DONATE||{}).bankCard||"";if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(function(){J.toast("شماره کارت کپی شد")},function(){J.toast("کپی انجام نشد؛ شماره را دستی بردارید",true)})}else{J.toast("شماره کارت را دستی کپی کنید")}});
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("#toast").classList.remove("on"); if ($("#sheet")) J.closeSheet(); else J.bot.close(); } }); };
 })();
 (function () { try { window.__jd.start(); } catch (e) { window.__jdFail && window.__jdFail(e); } })();
