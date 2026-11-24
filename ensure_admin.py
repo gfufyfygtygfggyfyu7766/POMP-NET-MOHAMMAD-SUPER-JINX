@@ -94,6 +94,9 @@ with GetDB() as db:
         # set RESET_ADMIN_PASSWORD=1. If ADMIN_PASSWORD is absent, create one strong
         # password in a dedicated private file, then print it only on first creation.
         generated = False
+        if DEFAULT_PW and len(DEFAULT_PW) < 14:
+            print("[admin] WARNING: weak ADMIN_PASSWORD ignored during recovery; generating a secure one-time password", flush=True)
+            DEFAULT_PW = ""
         if not DEFAULT_PW:
             try:
                 with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
