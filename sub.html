@@ -399,6 +399,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #168c
 @media(max-width:600px){.amb .neb,.amb .floor,.amb .gr,.amb .dust{display:none!important}.amb .a1,.amb .a2,.amb .a3,.amb .a4{animation:none!important;filter:none!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+.pn-sub-credit{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:100%;margin:0 auto 16px;padding:7px 13px;overflow:hidden;border:1px solid rgba(139,53,255,.42);border-radius:999px;background:linear-gradient(110deg,rgba(20,14,35,.92),rgba(8,20,36,.9));color:#d8d0e9;font:600 10px/1.8 "Vazirmatn",sans-serif;box-shadow:0 8px 25px #0005,inset 0 1px #ffffff12;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.pn-sub-credit:before{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent,#ffffff18,transparent);animation:pnSubShine 5s ease-in-out infinite}
+.pn-sub-credit b{color:#fff;font-weight:800}.pn-sub-credit i{font-style:normal;color:#a879ff;text-shadow:0 0 10px #8b35ff}.pn-sub-credit>span{width:6px;height:6px;border-radius:50%;background:#168cff;box-shadow:0 0 10px #168cff}
+@keyframes pnSubShine{55%,100%{transform:translateX(120%)}}
+@media(max-width:480px){.pn-sub-credit{font-size:9px;padding:6px 10px;gap:6px;margin-bottom:12px}}
+@media(prefers-reduced-motion:reduce){.pn-sub-credit:before{animation:none}}
 </style>
 </head>
 <body>
@@ -709,6 +715,7 @@ function JinxRender(D, o) {
        '<div class="tools"><button type="button" class="ib" data-a="lang" aria-label="Language">' + (m.fa ? "EN" : "FA") + '</button>' +
        '<button type="button" class="ib" data-a="theme" aria-label="Theme">' + I(o.theme === "light" ? "moon" : "sun") + '</button></div></header>';
 
+  h += '<div class="pn-sub-credit" role="note"><span></span><b>کدنویسی و توسعه توسط تیم POMP NET MOHAMMAD</b><i>✦</i>با همراهی SUPER JINX</div>';
   h += '<div class="cols"><div class="col cl">';
   /* the pass */
   h += '<section class="pass-wrap' + A + '" id="s-pass"' + rise() + '><div class="pass st-' + m.status + '" id="jx-pass">' +
