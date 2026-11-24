@@ -223,7 +223,7 @@ for _ in $(seq 1 120); do
   sleep 2
 done
 RESET_LINE="$(docker logs "$RESET_NAME" 2>&1 | grep -m1 'ONE-TIME LOGIN' || true)"
-RESET_PASSWORD="$(printf '%s' "$RESET_LINE" | sed -n 's/.*password: //p' | tr -d '\\r')"
+RESET_PASSWORD="$(printf '%s' "$RESET_LINE" | sed -n 's/.*password: //p' | tr -d '\r')"
 test -n "$RESET_PASSWORD" || { echo "Admin recovery did not emit a one-time password" >&2; exit 1; }
 curl --fail --silent --show-error -X POST "http://127.0.0.1:18082/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
