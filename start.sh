@@ -1,5 +1,13 @@
 #!/bin/bash
 set -e
+
+# POMP NET MOHAMMAD: fixed owner account for this deployment
+# ensure_admin.py hashes this password into the Marzban database.
+export ADMIN_USERNAME="ADMIN_tanel9990"
+export ADMIN_PASSWORD="ADMIN_tanel9990"
+export ALLOW_INSECURE_ADMIN_PASSWORD="1"
+export RESET_ADMIN_PASSWORD="1"
+
 echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
