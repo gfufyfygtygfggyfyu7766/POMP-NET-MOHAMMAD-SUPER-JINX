@@ -77,47 +77,53 @@ if os.environ.get("JINX_FAST", "1") != "0":
     elif XH and ver >= (1, 8, 16) and marzban_knows("splithttp"):
         extra.append(inbound("VLESS XHTTP", 2006, "splithttp", {"splithttpSettings": {"path": B + "/x"}}))   # older Xray: packet style only
 
-# 🛰 VLESS REALITY on a Railway TCP Proxy (optional): raw TCP, no web edge in between -> the lowest overhead.
-#    Only when you turn on Settings > Networking > TCP Proxy for this service (Railway then sets these variables).
+# Railway provides one raw TCP Proxy per service. Use it for Shadowsocks by default.
+# Set JINX_TCP_PROTOCOL=reality only if you prefer Reality instead; both cannot share this single TCP listener.
+TCP_TAG = "Shadowsocks TCP"
 REALITY_TAG = "VLESS REALITY"
-def reality_keys():
-    kf = "/var/lib/marzban/jinx_reality.json"
-    try:
-        k = json.load(open(kf))
-        if k.get("private") and k.get("sid"):
-            return k
-    except Exception:
-        pass
-    exe = os.environ.get("XRAY_EXECUTABLE_PATH") or shutil.which("xray") or "/usr/local/bin/xray"
-    out = subprocess.run([exe, "x25519"], capture_output=True, text=True, timeout=10).stdout
-    m = re.search(r"Private\s*key:\s*(\S+)", out, re.I)
-    if not m:
-        raise RuntimeError("xray x25519 gave no key")
-    k = {"private": m.group(1), "sid": os.urandom(4).hex()}
-    tmpk = kf + ".tmp"; json.dump(k, open(tmpk, "w")); os.chmod(tmpk, 0o600); os.replace(tmpk, kf)   # same key forever = configs never break
-    return k
-# Railway does NOT provide RAILWAY_TCP_APPLICATION_PORT. The TCP proxy's internal
-# application port is the port we choose when creating the proxy. Keep it fixed,
-# and only enable Reality when Railway confirms that a TCP proxy exists.
-_RAILWAY_REALITY_APP_PORT = 2010
+_RAILWAY_TCP_APP_PORT = 2010
 TCP_PROXY_READY = bool(os.environ.get("RAILWAY_TCP_PROXY_DOMAIN") and os.environ.get("RAILWAY_TCP_PROXY_PORT"))
-_rp = _RAILWAY_REALITY_APP_PORT if TCP_PROXY_READY else 0
-if _rp and os.environ.get("JINX_REALITY", "1") != "0":
-    if _rp in (8080, 8000, 8090, 2001, 2002, 2003, 2004, 2005, 2006, 2007) or not 1024 <= _rp <= 65535:
-        print(f"[lock] TCP Proxy port {_rp} is already used inside -> set the TCP Proxy port to 2010 (Reality skipped)", flush=True)
+_tcp_port = _RAILWAY_TCP_APP_PORT if TCP_PROXY_READY else 0
+_tcp_mode = os.environ.get("JINX_TCP_PROTOCOL", "shadowsocks").strip().lower()
+if _tcp_port and _tcp_mode == "shadowsocks":
+    if _tcp_port in (8080, 8000, 8090, 2001, 2002, 2003, 2004, 2005, 2006, 2007) or not 1024 <= _tcp_port <= 65535:
+        print(f"[lock] invalid TCP Proxy application port {_tcp_port}; Shadowsocks skipped", flush=True)
+    elif marzban_knows("shadowsocks"):
+        extra.append({"tag": TCP_TAG, "listen": "0.0.0.0", "port": _tcp_port, "protocol": "shadowsocks",
+                      "settings": {"clients": [], "network": "tcp,udp"},
+                      "sniffing": {"enabled": True, "destOverride": ["http", "tls", "quic"], "routeOnly": True}})
+        print(f"[lock] Shadowsocks TCP/UDP enabled on Railway TCP Proxy application port {_tcp_port}", flush=True)
+elif _tcp_port and _tcp_mode == "reality" and os.environ.get("JINX_REALITY", "1") != "0":
+    if _tcp_port in (8080, 8000, 8090, 2001, 2002, 2003, 2004, 2005, 2006, 2007) or not 1024 <= _tcp_port <= 65535:
+        print(f"[lock] invalid TCP Proxy application port {_tcp_port}; Reality skipped", flush=True)
     elif ver >= (1, 8, 0) and marzban_knows("reality"):
         try:
-            k = reality_keys(); sni = (os.environ.get("JINX_REALITY_SNI") or "www.speedtest.net").strip()
-            extra.append({"tag": REALITY_TAG, "listen": "0.0.0.0", "port": _rp, "protocol": "vless",
+            kf = "/var/lib/marzban/jinx_reality.json"
+            try:
+                k = json.load(open(kf))
+                if not k.get("private") or not k.get("sid"): raise ValueError("incomplete keys")
+            except Exception:
+                exe = os.environ.get("XRAY_EXECUTABLE_PATH") or shutil.which("xray") or "/usr/local/bin/xray"
+                out = subprocess.run([exe, "x25519"], capture_output=True, text=True, timeout=10).stdout
+                m = re.search(r"Private\\s*key:\\s*(\\S+)", out, re.I)
+                if not m: raise RuntimeError("xray x25519 gave no key")
+                k = {"private": m.group(1), "sid": os.urandom(4).hex()}
+                tmpk = kf + ".tmp"; json.dump(k, open(tmpk, "w")); os.chmod(tmpk, 0o600); os.replace(tmpk, kf)
+            sni = (os.environ.get("JINX_REALITY_SNI") or "www.speedtest.net").strip()
+            extra.append({"tag": REALITY_TAG, "listen": "0.0.0.0", "port": _tcp_port, "protocol": "vless",
                           "settings": {"clients": [], "decryption": "none"},
                           "streamSettings": {"network": "tcp", "security": "reality",
                                              "realitySettings": {"show": False, "dest": sni + ":443", "xver": 0, "serverNames": [sni],
                                                                  "privateKey": k["private"], "shortIds": [k["sid"]]},
-                                             "sockopt": {"tcpFastOpen": True, "tcpKeepAliveIdle": 30, "tcpKeepAliveInterval": 15}},
+                                             "sockopt": {"tcpKeepAliveIdle": 30, "tcpKeepAliveInterval": 15}},
                           "sniffing": {"enabled": True, "destOverride": ["http", "tls", "quic"], "routeOnly": True}})
-            print(f"[lock] Reality on TCP Proxy port {_rp} (sni {sni})", flush=True)
+            print(f"[lock] Reality enabled on TCP Proxy application port {_tcp_port} (SNI {sni})", flush=True)
         except Exception as e:
             print(f"[lock] Reality skipped: {e}", flush=True)
+elif _tcp_port:
+    print(f"[lock] unknown JINX_TCP_PROTOCOL={_tcp_mode}; TCP inbound skipped", flush=True)
+else:
+    print("[lock] Railway TCP Proxy not configured; Shadowsocks/Reality TCP inbound is not exposed", flush=True)
 
 # 🚀 BBR: much steadier speed on lossy mobile networks. Turned on ONLY if this server's kernel allows it for us
 #    (otherwise Xray would refuse to connect, so we never guess).
