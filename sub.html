@@ -358,11 +358,29 @@ body{background:#050509}
 button:focus-visible,a:focus-visible{outline:2px solid #8B35FF;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
+
+/* POMP NET MOHAMMAD subscription identity: brand first, SUPER JINX as the compact edition mark */
+:root{--a:#8b35ff;--a2:#c7a6ff;--gold:#8b35ff;--gold2:#5c36d8;--c:#168cff}
+[data-theme=dark]{--bg:#050509;--dev:#0b0b15;--t1:#f7f4ff;--t2:#aaa2bd;--line:rgba(139,53,255,.16);--line2:rgba(139,53,255,.3)}
+[data-theme=light]{--a:#7130d6;--a2:#8b35ff;--gold:#7130d6;--gold2:#168cff}
+.top .brand .word{font-size:clamp(15px,3.5vw,20px);font-weight:900;letter-spacing:.15px;background:linear-gradient(100deg,#fff,#c7a6ff 55%,#69baff);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:min(66vw,340px);overflow-wrap:anywhere}
+.top .brand>span small{display:block;margin-top:4px;font-size:9px;letter-spacing:2px;color:#a98bd9;font-weight:800}
+.intro-brand{display:grid;gap:5px;text-align:center}
+.intro-brand b{font-size:clamp(17px,5vw,24px);font-weight:900;letter-spacing:.5px;color:#f8f4ff}
+.intro-brand small{font-size:10px;letter-spacing:4px;font-weight:900;color:#8b35ff}
+.pass{border-color:rgba(139,53,255,.42)}
+.foil{background:linear-gradient(115deg,transparent 20%,rgba(139,53,255,.25) 32%,rgba(22,140,255,.32) 46%,rgba(180,140,255,.2) 58%,transparent 75%)}
+.p-lbl{color:#d7bcff;border-color:rgba(139,53,255,.5);background:rgba(139,53,255,.13)}
+.perf::after{border-color:rgba(139,53,255,.42)}
+.portal,.card,.panel,.box{border-color:rgba(139,53,255,.2)}
+button:focus-visible,a:focus-visible{outline-color:#168cff}
+@media(max-width:480px){.top .brand .word{font-size:15px;max-width:58vw}.top .brand>span small{font-size:8px;letter-spacing:1.5px}}
+
 </style>
 </head>
 <body>
 <div class="amb" aria-hidden="true"><span class="neb"></span><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i><span class="floor"></span><span class="dust"></span><span class="gr"></span></div>
-<div class="intro" id="jx-intro" aria-hidden="true"><svg class="ig" viewBox="0 0 64 64" fill="none"><path class="sg-hex" d="M32 3 57 17.5v29L32 61 7 46.5v-29Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path class="sg-j" d="M38 16v20.5a8.5 8.5 0 0 1-17 0" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><path class="sg-bolt" d="M33 24 27 33h6l-3 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><p>SUPER JINX</p></div>
+<div class="intro" id="jx-intro" aria-hidden="true"><svg class="ig" viewBox="0 0 64 64" fill="none"><path class="sg-hex" d="M32 3 57 17.5v29L32 61 7 46.5v-29Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path class="sg-j" d="M38 16v20.5a8.5 8.5 0 0 1-17 0" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><path class="sg-bolt" d="M33 24 27 33h6l-3 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="intro-brand"><b>POMP NET MOHAMMAD</b><small>SUPER JINX</small></div></div>
 <script>try{if(sessionStorage.getItem("jx-seen"))document.documentElement.classList.add("seen");sessionStorage.setItem("jx-seen","1")}catch(e){}</script>
 <script>try{localStorage.removeItem("jx-view")}catch(e){}</script>
 <script id="jinx-data" type="application/json">{"username": {{ user.username|tojson }}, "status": {{ user.status|string|tojson }}, "used": {{ (user.used_traffic or 0)|tojson }}, "limit": {{ (user.data_limit or 0)|tojson }}, "expire": {{ (user.expire or 0)|tojson }}, "reset": {{ (user.data_limit_reset_strategy|string)|tojson }}, "online": {{ ((user.online_at|string) if user.online_at else "")|tojson }}, "hold": {{ (user.on_hold_expire_duration or 0)|tojson }}, "links": {{ (user.links or [])|tojson }}, "sub": {{ (user.subscription_url or "")|tojson }}}</script>
@@ -602,14 +620,14 @@ function cfgName(r) { r = String(r || ""); var p = r.split(" \u2726 "); if (p.le
 /* ---------- v7 texts on top of the base texts ---------- */
 function JinxText(fa) {
   var b = JinxTextBase(fa), x = fa ? {
-    pass: "JINX PASS", access: "دسترسی اختصاصی", holder: "صاحب اشتراک", serial: "شماره‌ی پاس", left2: "باقی‌مانده", exp2: "انقضا", cd: "زمان",
+    pass: "JINX PASS", access: "SUPER JINX · اشتراک اختصاصی", holder: "صاحب اشتراک", serial: "شماره‌ی پاس", left2: "باقی‌مانده", exp2: "انقضا", cd: "زمان",
     reactor: "هسته‌ی مصرف", dataRing: "حجم", timeRing: "زمان", ofTotal: "از", telemetry: "وضعیت زنده",
     portal: "عضویت در کانال", portalD: "سرورهای جدید، اطلاعیه‌ها و پشتیبانی", portalGo: "ورود به کانال",
     dPass: "پاس", dCfg: "کانفیگ", dApps: "برنامه", dCare: "پشتیبان", care: "JinX Care", careSub: "ربات پشتیبان خودکار",
     sig: "طراحی و ساخت اختصاصی", tapCopy: "برای کپی بزن", freq: "فرکانس‌ها",
     rt: { relay: "رله ایران", cdn: "CDN", direct: "مستقیم", frag: "فرگمنت", reality: "ریالیتی", other: "کانفیگ" }
   } : {
-    pass: "JINX PASS", access: "Private access", holder: "Pass holder", serial: "Pass no.", left2: "Remaining", exp2: "Expires", cd: "Time",
+    pass: "JINX PASS", access: "SUPER JINX · PRIVATE ACCESS", holder: "Pass holder", serial: "Pass no.", left2: "Remaining", exp2: "Expires", cd: "Time",
     reactor: "Usage core", dataRing: "Data", timeRing: "Time", ofTotal: "of", telemetry: "Live status",
     portal: "Join our channel", portalD: "New servers, announcements and support", portalGo: "Open channel",
     dPass: "Pass", dCfg: "Configs", dApps: "Apps", dCare: "Care", care: "JinX Care", careSub: "Automatic support bot",
@@ -767,10 +785,10 @@ function JinxRender(D, o) {
    Edit JINX_CONFIG to change brand / channel / platforms later.
    ===================================================================================== */
 var JINX_CONFIG = {
-  brand: "POMP NET MOHAMMAD — SUPER JINX",
-  brandFa: "جینکس",
-  channel: "https://t.me/Super_Jinx",
-  channelHandle: "@Super_Jinx",
+  brand: "POMP NET MOHAMMAD",
+  brandFa: "POMP NET MOHAMMAD",
+  channel: "https://t.me/pompnet",
+  channelHandle: "@pompnet",
   updateHours: 6,                        /* keep equal to SUB_UPDATE_INTERVAL in start.sh */
   platforms: ["android", "ios", "windows"]
 };
