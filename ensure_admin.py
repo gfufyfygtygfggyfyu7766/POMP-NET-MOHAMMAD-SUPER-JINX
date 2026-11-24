@@ -17,7 +17,7 @@ ALLOW_INSECURE = (DEFAULT_PW == "admin" or os.environ.get("ALLOW_INSECURE_ADMIN_
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
-ADMIN_RECOVERY_MARKER = "/var/lib/marzban/.pompnet-admin-admin-recovery-v2"
+ADMIN_RECOVERY_MARKER = "/var/lib/marzban/.pompnet-admin-admin-recovery-v3"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = (os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
