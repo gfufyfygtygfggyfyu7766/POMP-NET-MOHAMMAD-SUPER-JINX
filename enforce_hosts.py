@@ -71,16 +71,17 @@ def _ws_base():
     return b if _re.fullmatch(r"/cdn/[A-Za-z0-9-]{8,64}", b) else "/cdn/jinx"
 WSB = _ws_base()
 PATHS = {LOCKED_TAG: WSB, "VLESS WS": WSB + "/v", "VMESS WS": WSB + "/m",
-         "TROJAN WS": WSB + "/t", "VLESS HTTPUPGRADE": WSB + "/u", "VLESS XHTTP": WSB + "/x", "VLESS XHTTP SU": WSB + "/s"}
+         "TROJAN WS": WSB + "/t", "VLESS HTTPUPGRADE": WSB + "/u", "VLESS XHTTP": WSB + "/x"}
 # paths of v12 and before: hosts that still have them are ours too and get moved to the new path
 OLD_PATHS = {LOCKED_TAG: "/panel-ws", "VLESS WS": "/vless", "VMESS WS": "/vmess", "TROJAN WS": "/trojan",
              "VLESS HTTPUPGRADE": "/vhu", "VLESS XHTTP": "/vxh", "VLESS XHTTP SU": ""}
 # 🛰 Reality over a Railway TCP Proxy (only when TCP Proxy is on; see lock.py)
 REALITY_TAG = "VLESS REALITY"
 SHADOWSOCKS_TAG = "Shadowsocks TCP"
-TCP_DOMAIN = os.environ.get("RAILWAY_TCP_PROXY_DOMAIN", "").strip()
+# SideRail-compatible mode intentionally excludes raw TCP/Reality/SS inbounds.
+TCP_DOMAIN = ""
 try:
-    TCP_PORT = int(os.environ.get("RAILWAY_TCP_PROXY_PORT") or 0)
+    TCP_PORT = 0
 except ValueError:
     TCP_PORT = 0
 REALITY_SNI = (os.environ.get("JINX_REALITY_SNI") or "www.speedtest.net").strip()
@@ -89,7 +90,7 @@ if TCP_DOMAIN and TCP_PORT:
         PATHS[SHADOWSOCKS_TAG] = ""
     elif os.environ.get("JINX_TCP_PROTOCOL", "shadowsocks").strip().lower() == "reality" and os.environ.get("JINX_REALITY", "1") != "0":
         PATHS[REALITY_TAG] = ""
-PROTO = {SHADOWSOCKS_TAG: "Shadowsocks", REALITY_TAG: "Reality", LOCKED_TAG: "JinX Core", "VLESS WS": "VLESS", "VMESS WS": "VMess", "TROJAN WS": "Trojan", "VLESS HTTPUPGRADE": "HTTPUpgrade", "VLESS XHTTP": "XHTTP", "VLESS XHTTP SU": "XHTTP"}
+PROTO = {SHADOWSOCKS_TAG: "Shadowsocks", REALITY_TAG: "Reality", LOCKED_TAG: "JinX Core", "VLESS WS": "VLESS", "VMESS WS": "VMess", "TROJAN WS": "Trojan", "VLESS HTTPUPGRADE": "HTTPUpgrade", "VLESS XHTTP": "XHTTP"}
 # route names (each config gets its own name; the apps still pick the fastest one with their ping test)
 R_RELAY, R_CDN_IP, R_CDN = "🚀 Turbo Iran", "🌩 Cloud Storm", "☁️ Cloud Shield"
 # Railway region of this service (works in all 4; Amsterdam = lowest ping from Iran)
@@ -201,7 +202,7 @@ def frag_of(profile):
 
 # when an inbound is missing in this image, its methods move to the next best transport WITH THE SAME NAME,
 # so the 12 names never change and never repeat (XHTTP -> HTTPUpgrade -> WebSocket, HTTPUpgrade -> WebSocket)
-XH_TAGS = {"VLESS XHTTP", "VLESS XHTTP SU"}
+XH_TAGS = {"VLESS XHTTP"}
 FALLBACK = {"VLESS XHTTP SU": ("VLESS XHTTP", "VLESS HTTPUPGRADE", "VLESS WS"), "VLESS XHTTP": ("VLESS HTTPUPGRADE", "VLESS WS"), "VLESS HTTPUPGRADE": ("VLESS WS",)}
 
 def plan_12():
