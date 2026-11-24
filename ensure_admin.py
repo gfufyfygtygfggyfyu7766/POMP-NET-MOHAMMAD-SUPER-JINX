@@ -7,8 +7,9 @@
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-# The panel owner login defaults to admin but honors ADMIN_USERNAME.
-ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
+# Fixed owner login name: every fresh install and one-time recovery uses "admin".
+# ADMIN_USERNAME is intentionally ignored so the panel username remains admin.
+ADMIN = "admin"
 # An explicit ADMIN_PASSWORD is honored; otherwise a strong one-time password is generated.
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 # Weak passwords are rejected unless the operator explicitly opts in for a controlled test or recovery.
