@@ -127,7 +127,7 @@ else
 fi
 test -n "${SUB_BODY:-}" || { echo "Subscription endpoint returned an empty body" >&2; exit 1; }
 # Decode the real Marzban subscription and verify every selected protocol is actually emitted.
-printf '%s' "$SUB_BODY" | python -c 'import base64,sys; raw=sys.stdin.buffer.read().strip(); txt=raw.decode(errors="ignore");\ntry: txt=base64.b64decode(raw + b"="*((4-len(raw)%4)%4), validate=False).decode(errors="ignore")\nexcept Exception: pass\nlines=[x.strip() for x in txt.splitlines() if x.strip()]\nmissing=[p for p in ("vless://","vmess://","trojan://") if not any(x.lower().startswith(p) for x in lines)]\nassert not missing, "subscription missing protocol links: "+", ".join(missing)\nprint("[smoke] real subscription contains VLESS + VMess + Trojan links: OK")'
+printf '%s' "$SUB_BODY" | python -c 'import base64,sys; raw=sys.stdin.buffer.read().strip(); txt=raw.decode(errors="ignore"); txt=base64.b64decode(raw+b"="*((4-len(raw)%4)%4)).decode(errors="ignore") if not any(txt.lower().startswith(p) for p in ("vless://","vmess://","trojan://")) else txt; lines=[x.strip() for x in txt.splitlines() if x.strip()]; missing=[p for p in ("vless://","vmess://","trojan://") if not any(x.lower().startswith(p) for x in lines)]; assert not missing, "subscription missing protocol links: "+", ".join(missing); print("[smoke] real subscription contains VLESS + VMess + Trojan links: OK")'
 # Browser subscription page must render the custom Persian POMP NET template, not only raw config text.
 SUB_PAGE="$(curl --location --fail --silent --show-error -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124.0 Mobile Safari/537.36' -H 'Accept: text/html,application/xhtml+xml' "$BASE$SUB_PATH")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$SUB_PAGE"
