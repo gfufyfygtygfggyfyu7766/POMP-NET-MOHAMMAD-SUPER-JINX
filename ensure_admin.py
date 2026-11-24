@@ -27,7 +27,7 @@ if not DEFAULT_PW:
         os.makedirs(os.path.dirname(PASSWORD_FILE), exist_ok=True)
         fd = os.open(PASSWORD_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(DEFAULT_PW + "\\n")
+            f.write(DEFAULT_PW + "\n")
             f.flush()
             os.fsync(f.fileno())
         print(f"[admin] ONE-TIME LOGIN username: {ADMIN} | password: {DEFAULT_PW}", flush=True)
@@ -109,7 +109,7 @@ with GetDB() as db:
         if not applied_before or RESET:
             fd = os.open(APPLIED_MARKER, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             with os.fdopen(fd, "w", encoding="utf-8") as marker:
-                marker.write("completed\\n")
+                marker.write("completed\n")
                 marker.flush()
                 os.fsync(marker.fileno())
 
