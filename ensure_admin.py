@@ -8,7 +8,8 @@ import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
-DEFAULT_PW = "admin"  # requested one-time first-login credential; owner should change it immediately
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
+ALLOW_INSECURE = os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
@@ -68,8 +69,8 @@ with GetDB() as db:
             except OSError:
                 DEFAULT_PW = secrets.token_urlsafe(32)
                 generated = True
-        if len(DEFAULT_PW) < 14 and DEFAULT_PW != "admin":
-            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters (or use the one-time default admin/admin)", flush=True)
+        if len(DEFAULT_PW) < 14 and not ALLOW_INSECURE:
+            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters; set ALLOW_INSECURE_ADMIN_PASSWORD=1 only if you explicitly accept a weak password", flush=True)
             sys.exit(1)
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
@@ -97,9 +98,28 @@ with GetDB() as db:
         if taken_by_reseller:
             print("[admin] FATAL: username admin belongs to a reseller; rename that reseller before recovery", flush=True)
             sys.exit(1)
+        recovery_pw = DEFAULT_PW
+        generated = False
+        if not recovery_pw:
+            try:
+                with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
+                    recovery_pw = _f.read().strip()
+            except OSError:
+                recovery_pw = secrets.token_urlsafe(32)
+                generated = True
+                fd = os.open(RESET_PASSWORD_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                    _f.write(recovery_pw)
+                    _f.flush()
+                    os.fsync(_f.fileno())
+        if len(recovery_pw) < 14 and not ALLOW_INSECURE:
+            print("[admin] FATAL: weak ADMIN_PASSWORD rejected; set ALLOW_INSECURE_ADMIN_PASSWORD=1 only if you explicitly accept this risk", flush=True)
+            sys.exit(1)
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         a.username = ADMIN
-        set_pw(a, "admin")
+        set_pw(a, recovery_pw)
+        if generated:
+            print(f"[admin] ONE-TIME LOGIN -> username: {ADMIN} | password: {recovery_pw}", flush=True)
         try:
             fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(fd, "w", encoding="utf-8") as _f:
@@ -108,18 +128,15 @@ with GetDB() as db:
                 os.fsync(_f.fileno())
         except FileExistsError:
             pass
-        msg = "[admin] one-time login recovery applied: username=admin password=admin; change it immediately after login"
+        msg = f"[admin] one-time recovery applied for {ADMIN}; remove RESET_ADMIN_PASSWORD after successful login if it was set"
     elif RESET:
         if len(ADMIN) < 3:
             print("[admin] FATAL: ADMIN_USERNAME must contain at least 3 characters", flush=True)
             sys.exit(1)
-        # A controlled recovery is possible even when the old password is unknown:
-        # set RESET_ADMIN_PASSWORD=1. If ADMIN_PASSWORD is absent, create one strong
-        # password in a dedicated private file, then print it only on first creation.
+        # Set RESET_ADMIN_PASSWORD=1 to recover an existing owner account.
+        # An explicit ADMIN_PASSWORD is honored; without one, a strong one-time
+        # password is generated, persisted on the volume, and printed once.
         generated = False
-        if DEFAULT_PW and len(DEFAULT_PW) < 14:
-            print("[admin] WARNING: weak ADMIN_PASSWORD ignored during recovery; generating a secure one-time password", flush=True)
-            DEFAULT_PW = ""
         if not DEFAULT_PW:
             try:
                 with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
@@ -138,8 +155,8 @@ with GetDB() as db:
                     with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
                         DEFAULT_PW = _f.read().strip()
                     generated = False
-        if len(DEFAULT_PW) < 14:
-            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters", flush=True)
+        if len(DEFAULT_PW) < 14 and not ALLOW_INSECURE:
+            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters; set ALLOW_INSECURE_ADMIN_PASSWORD=1 only if you explicitly accept a weak password", flush=True)
             sys.exit(1)
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         taken = any(x.username == ADMIN and x is not a for x in panel_admins)   # 'admin' used by a reseller
