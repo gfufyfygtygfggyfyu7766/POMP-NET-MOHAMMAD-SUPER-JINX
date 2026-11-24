@@ -68,18 +68,35 @@ PY
 fi
 
 # Never use documentation placeholders such as panel.example.com in generated subscriptions.
-PANEL_DOMAIN_CANDIDATE="${PANEL_DOMAIN:-}"
-case "${PANEL_DOMAIN_CANDIDATE,,}" in
-  ""|example.com|*.example.com)
-    PUBLIC_DOMAIN="${RAILWAY_PUBLIC_DOMAIN:-$CF_TUNNEL_HOSTNAME}"
-    ;;
-  *)
-    PUBLIC_DOMAIN="$PANEL_DOMAIN_CANDIDATE"
-    ;;
-esac
-case "${PUBLIC_DOMAIN,,}" in
-  example.com|*.example.com) PUBLIC_DOMAIN="";;
-esac
+# Resolve the public hostname automatically. Explicit PANEL_DOMAIN wins; then
+# platform-provided hostnames are checked. Never invent a hostname or use an example domain.
+PUBLIC_DOMAIN_CANDIDATE="${PANEL_DOMAIN:-${PUBLIC_DOMAIN:-${APP_DOMAIN:-}}}"
+if [ -z "$PUBLIC_DOMAIN_CANDIDATE" ]; then
+  PUBLIC_DOMAIN_CANDIDATE="${RAILWAY_PUBLIC_DOMAIN:-${RAILWAY_STATIC_URL:-${RENDER_EXTERNAL_HOSTNAME:-${KOYEB_PUBLIC_DOMAIN:-}}}}"
+fi
+if [ -z "$PUBLIC_DOMAIN_CANDIDATE" ] && [ -n "${FLY_APP_NAME:-}" ]; then
+  PUBLIC_DOMAIN_CANDIDATE="${FLY_APP_NAME}.fly.dev"
+fi
+if [ -z "$PUBLIC_DOMAIN_CANDIDATE" ] && [ -n "${HEROKU_APP_NAME:-}" ]; then
+  PUBLIC_DOMAIN_CANDIDATE="${HEROKU_APP_NAME}.herokuapp.com"
+fi
+# Accept either a hostname or an https URL from platform variables; reduce it to a hostname.
+PUBLIC_DOMAIN="$(python - "$PUBLIC_DOMAIN_CANDIDATE" <<'PY'
+import sys, re
+from urllib.parse import urlsplit
+v = (sys.argv[1] or "").strip()
+if not v or v.lower() in ("example.com",) or v.lower().endswith(".example.com"):
+    print(""); raise SystemExit
+u = urlsplit(v if "://" in v else "//" + v)
+h = (u.hostname or "").lower().rstrip(".")
+if not h or not re.fullmatch(r"[a-z0-9.-]+", h) or "." not in h or h == "example.com" or h.endswith(".example.com"):
+    h = ""
+print(h)
+PY
+)"
+if [ -z "$PUBLIC_DOMAIN" ] && [ -n "${CF_TUNNEL_TOKEN:-}" ]; then
+  PUBLIC_DOMAIN="$CF_TUNNEL_HOSTNAME"
+fi
 if [ -n "$PUBLIC_DOMAIN" ]; then
   # Railway terminates public TLS on its generated HTTPS domain and forwards HTTP to PORT=8080.
   # Subscription URLs must use the public hostname without an internal or TCP-proxy port.
