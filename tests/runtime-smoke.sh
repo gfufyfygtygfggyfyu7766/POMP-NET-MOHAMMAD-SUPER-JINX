@@ -200,7 +200,7 @@ curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   --data-urlencode "password=$AUTO_PASSWORD" \
   | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
 
-# Existing admin recovery path: the one-time migration marker upgrades the existing owner to admin/admin.
+# Existing admin recovery path: an explicitly requested reset changes the existing owner password.
 # Stop the previous container first; never mount the same SQLite volume twice.
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d --name "$RESET_NAME" \
@@ -208,6 +208,7 @@ docker run -d --name "$RESET_NAME" \
   -v "$VOLUME:/var/lib/marzban" \
   -e ADMIN_USERNAME="$ADMIN" \
   -e ADMIN_PASSWORD="$PASSWORD" \
+  -e ALLOW_INSECURE_ADMIN_PASSWORD=1 \
   -e RESET_ADMIN_PASSWORD=1 \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="http://127.0.0.1:18082" \
   "$IMAGE" >/dev/null
