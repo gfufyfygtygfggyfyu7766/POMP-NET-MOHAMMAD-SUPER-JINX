@@ -96,10 +96,12 @@ def reality_keys():
     k = {"private": m.group(1), "sid": os.urandom(4).hex()}
     tmpk = kf + ".tmp"; json.dump(k, open(tmpk, "w")); os.chmod(tmpk, 0o600); os.replace(tmpk, kf)   # same key forever = configs never break
     return k
-try:
-    _rp = int(os.environ.get("RAILWAY_TCP_APPLICATION_PORT") or 0)
-except ValueError:
-    _rp = 0
+# Railway does NOT provide RAILWAY_TCP_APPLICATION_PORT. The TCP proxy's internal
+# application port is the port we choose when creating the proxy. Keep it fixed,
+# and only enable Reality when Railway confirms that a TCP proxy exists.
+_RAILWAY_REALITY_APP_PORT = 2010
+TCP_PROXY_READY = bool(os.environ.get("RAILWAY_TCP_PROXY_DOMAIN") and os.environ.get("RAILWAY_TCP_PROXY_PORT"))
+_rp = _RAILWAY_REALITY_APP_PORT if TCP_PROXY_READY else 0
 if _rp and os.environ.get("JINX_REALITY", "1") != "0":
     if _rp in (8080, 8000, 8090, 2001, 2002, 2003, 2004, 2005, 2006, 2007) or not 1024 <= _rp <= 65535:
         print(f"[lock] TCP Proxy port {_rp} is already used inside -> set the TCP Proxy port to 2010 (Reality skipped)", flush=True)
