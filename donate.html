@@ -898,7 +898,7 @@ var JinxCoinIcon = {
     f.onclick = function () { J.bot.isOpen() ? J.bot.close() : J.bot.open(); }; document.body.appendChild(f); }
   function mount() { var m = mq.matches ? "D" : "M"; if (m === S.mode) return; S.mode = m; J.closeSheet(true); if (J.bot.isOpen()) J.bot.close();
     document.body.className = m;
-    if (!S.good.length) { $("#app").innerHTML = '<div class="wrap">' + J.topHtml() + J.bankSupportHtml() + '</div>'; J.theme(root.getAttribute("data-theme")); wire(); return; }
+    if (!S.good.length) { $("#app").innerHTML = '<div class="wrap">' + J.topHtml() + J.bankSupportHtml() + '</div>'; J.theme(root.getAttribute("data-theme")); return; }
     $("#app").innerHTML = m === "D" ? J.renderDesk() : J.renderMob(); J.theme(root.getAttribute("data-theme")); wire(); fab();
     var c = S.cur || J.byId(location.hash.slice(1)); J.select(c && c.ok ? c : S.good[0], "force"); J.heal(); }
   J.start = function () { var t = null; try { t = localStorage.getItem("jinx-don-theme") || localStorage.getItem("chakra-ui-color-mode"); } catch (e) {} root.setAttribute("data-theme", t === "light" ? "light" : "dark"); mount();
