@@ -97,6 +97,41 @@ jobs:
           token_code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:18080/api/admin/token)
           case "$token_code" in 400|401|422) ;; *) echo "Admin API route returned unexpected HTTP $token_code"; exit 1 ;; esac
 
-          docker exec pompnet-smoke sh -lc 'pgrep -af "[x]ray" >/dev/null'
-          docker exec pompnet-smoke python -c 'import json; c=json.load(open("/var/lib/marzban/xray_config.json")); assert c.get("inbounds"), "No active Xray inbounds"; print("Runtime Xray inbounds:", len(c["inbounds"]))'
-          echo "Runtime smoke test passed: panel HTTP routes and Xray process are up."
+          # Wait for Xray to start, then verify actual WebSocket upgrades through Nginx
+          # to all three generated protocol listeners (not just that the process exists).
+          docker exec pompnet-smoke python - <<'PY'
+          import json, os, socket, time
+          cfg = json.load(open("/var/lib/marzban/xray_config.json", encoding="utf-8"))
+          inbounds = {x.get("tag"): x for x in cfg.get("inbounds", [])}
+          assert {"VLESS WS", "VMESS WS", "TROJAN WS"}.issubset(inbounds), "Missing WS protocol inbounds"
+          base = "/cdn/" + open("/var/lib/marzban/jinx_path").read().strip()
+          checks = [( "VLESS WS", base + "/v"), ("VMESS WS", base + "/m"), ("TROJAN WS", base + "/t")]
+          for tag, path in checks:
+              ib = inbounds[tag]
+              assert ib.get("listen") == "127.0.0.1", f"{tag} must bind localhost behind Nginx"
+              assert ib.get("port") in (2001, 2002, 2003), f"{tag} unexpected port"
+              expected = ("/v", "/m", "/t")[checks.index((tag, path))]
+              assert (ib.get("streamSettings") or {}).get("wsSettings", {}).get("path") == base + expected, f"{tag} path mismatch"
+          def handshake(path):
+              s = socket.create_connection(("127.0.0.1", 8080), timeout=5)
+              req = (f"GET {path} HTTP/1.1\\r\\nHost: 127.0.0.1\\r\\nUpgrade: websocket\\r\\n"
+                     "Connection: Upgrade\\r\\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\\r\\n"
+                     "Sec-WebSocket-Version: 13\\r\\n\\r\\n").encode()
+              s.sendall(req)
+              data = s.recv(256)
+              s.close()
+              return data.split(b"\\r\\n", 1)[0]
+          deadline = time.time() + 120
+          while time.time() < deadline:
+              try:
+                  if all(handshake(path).startswith(b"HTTP/1.1 101") for _, path in checks):
+                      print("PASS: VLESS, VMess and Trojan WebSocket upgrades return HTTP 101 through Nginx")
+                      break
+              except OSError:
+                  pass
+              time.sleep(2)
+          else:
+              raise SystemExit("FAIL: Xray WebSocket handshake did not return HTTP 101 for all protocols")
+          print("Runtime Xray inbounds:", len(cfg["inbounds"]))
+          PY
+          echo "Runtime smoke test passed: panel, API routing and all three Xray WS handshakes are up."
