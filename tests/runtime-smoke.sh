@@ -61,6 +61,16 @@ login() {
     | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])'
 }
 
+# Subscription HTTPS port and visual accessibility regression checks.
+grep -q 'https://\$PUBLIC_DOMAIN:2096' start.sh
+grep -q '2096:2096' compose.yaml
+grep -q 'https://{\$PANEL_DOMAIN}:2096' Caddyfile
+echo "[smoke] subscription HTTPS port 2096 configuration: OK"
+grep -q -- 'POMP NET legibility and mobile performance overrides' jinx.css
+grep -q -- 'POMP NET readable subscription view' sub.html
+grep -q -- 'prefers-reduced-motion:reduce' jinx.css
+echo "[smoke] readable high-contrast low-motion styles: OK"
+
 start_panel
 wait_panel
 
