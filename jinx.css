@@ -225,3 +225,26 @@ a:hover { color: #72b7ff; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+
+/* POMP NET MOHAMMAD · Executive control-room skin (visual only; no control/API selectors hidden) */
+:root{--pomp-purple:#8b35ff;--pomp-blue:#168cff;--pomp-ink:#050509;--pomp-card:#10101b;--pomp-edge:rgba(139,53,255,.28)}
+html,body{background-color:#050509!important}
+body{background-image:radial-gradient(ellipse at 12% 0%,rgba(139,53,255,.19),transparent 38rem),radial-gradient(ellipse at 92% 12%,rgba(22,140,255,.12),transparent 32rem),linear-gradient(180deg,#07060d,#050509 65%)!important;background-attachment:fixed!important}
+.chakra-ui-dark .chakra-card,.chakra-ui-dark .chakra-modal__content,.chakra-ui-dark .chakra-menu__menu-list,[data-theme=dark] .chakra-card,[data-theme=dark] .chakra-modal__content,[data-theme=dark] .chakra-menu__menu-list{background:linear-gradient(145deg,#141222 0%,#0a0a13 100%)!important;border:1px solid var(--pomp-edge)!important;box-shadow:0 18px 48px #0007,0 0 26px #8b35ff0c!important}
+.chakra-ui-dark .chakra-card:hover,[data-theme=dark] .chakra-card:hover{border-color:#8b35ff78!important;transform:translateY(-2px);box-shadow:0 20px 48px #0008,0 0 24px #8b35ff20!important}
+.chakra-ui-dark .chakra-button[data-variant=solid],[data-theme=dark] .chakra-button[data-variant=solid]{background:linear-gradient(110deg,#8b35ff,#6333d6 58%,#168cff)!important;border:0!important;box-shadow:0 7px 22px #8b35ff2b!important}
+.chakra-ui-dark .chakra-table thead th,[data-theme=dark] .chakra-table thead th{background:#171326!important;color:#d8c8fa!important;border-bottom:1px solid #8b35ff55!important}
+.chakra-ui-dark .chakra-table tbody tr:hover,[data-theme=dark] .chakra-table tbody tr:hover{background:#8b35ff12!important}
+.chakra-ui-dark .chakra-input,.chakra-ui-dark .chakra-select,.chakra-ui-dark .chakra-textarea,[data-theme=dark] .chakra-input,[data-theme=dark] .chakra-select,[data-theme=dark] .chakra-textarea{background:#080811!important;border-color:#8b35ff48!important}
+.chakra-ui-dark .chakra-input:focus,.chakra-ui-dark .chakra-select:focus,.chakra-ui-dark .chakra-textarea:focus,[data-theme=dark] .chakra-input:focus,[data-theme=dark] .chakra-select:focus,[data-theme=dark] .chakra-textarea:focus{border-color:#168cff!important;box-shadow:0 0 0 1px #168cff,0 0 18px #168cff22!important}
+.chakra-ui-dark .chakra-tabs__tab[aria-selected=true],[data-theme=dark] .chakra-tabs__tab[aria-selected=true]{color:#d8c0ff!important;border-color:#8b35ff!important}
+.chakra-ui-dark .chakra-badge,[data-theme=dark] .chakra-badge{border:1px solid #8b35ff42;border-radius:999px}
+.chakra-ui-dark .chakra-modal__overlay,[data-theme=dark] .chakra-modal__overlay{background:#020208c9!important;backdrop-filter:blur(8px)}
+/* Native login form: restyle its real card and controls without replacing authentication */
+.chakra-ui-dark form,[data-theme=dark] form{font-family:var(--chakra-fonts-body)!important}
+.chakra-ui-dark form .chakra-card,[data-theme=dark] form .chakra-card{border:1px solid #8b35ff55!important;box-shadow:0 24px 80px #0009,0 0 55px #8b35ff17!important}
+.chakra-ui-dark input,[data-theme=dark] input{accent-color:#8b35ff}
+.chakra-ui-dark a,[data-theme=dark] a{color:#b995ff}
+@media(max-width:768px){.chakra-container{padding-inline:12px!important}.chakra-modal__content{max-height:calc(100dvh - 16px)!important;overflow:auto!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
