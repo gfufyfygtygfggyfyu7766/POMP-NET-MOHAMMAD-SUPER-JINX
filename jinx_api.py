@@ -6,7 +6,7 @@
 #   4) logs in with the new values and returns a fresh token -> the user is never kicked out
 # Brute-force protection: 5 wrong current passwords for an account -> that account is locked for 5 minutes.
 # Also: QR codes for the sub page, and the reseller panels (پنل‌های نمایندگی) with their limits.
-import json, re, sys, time, threading, urllib.error, urllib.parse, urllib.request
+import json, os, re, sys, time, threading, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 # 💎 donation page backup (used only if nginx can't read the file itself)
