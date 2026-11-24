@@ -5,7 +5,7 @@ echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
 # Admin credentials are stored as a bcrypt hash in the persistent database.
-# Bootstrap default: admin / admin. Set ADMIN_PASSWORD to override; change it after first login.
+# ADMIN_USERNAME defaults to admin. A missing ADMIN_PASSWORD triggers a strong one-time password.
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
