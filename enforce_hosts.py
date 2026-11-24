@@ -24,7 +24,7 @@ try:
     assert 1 <= RELAY_PORT <= 65535
 except Exception:
     print("[guard] WARNING: IRAN_RELAY_PORT is not a valid port -> using 443", flush=True); RELAY_PORT = 443
-FRAG = os.environ.get("JINX_FRAGMENT", "10-20,10-20,tlshello").strip()   # "" disables the fragment route
+FRAG = os.environ.get("JINX_FRAGMENT", "").strip()   # off by default: standard links are more compatible with v2rayNG and Hiddify
 # 🔐 secret path /cdn/<random id> + ?ed=2560 early data: exactly the SuperJinX config style
 #    (vless://...@<app>.up.railway.app:443?type=ws&security=tls&path=/cdn/<id>?ed=2560&alpn=http/1.1&fp=ios)
 import re as _re
@@ -64,7 +64,7 @@ _REG = (os.environ.get("RAILWAY_REPLICA_REGION") or os.environ.get("JINX_REGION"
 REGION = ("🇺🇸 Virginia" if "us-east" in _REG else "🇺🇸 California" if "us-west" in _REG else
           "🇸🇬 Singapore" if "asia" in _REG or "southeast" in _REG else "🇳🇱 Amsterdam")
 # two fragment profiles: strong (SNI-filtered operators) and light (almost no speed cost)
-FRAG_LIGHT = os.environ.get("JINX_FRAGMENT_LIGHT", "100-200,1-3,tlshello").strip()
+FRAG_LIGHT = os.environ.get("JINX_FRAGMENT_LIGHT", "").strip()
 # ⚡ 12 direct methods, each one different (transport x TLS fingerprint x ALPN x fragment) -> one of them always flies
 #    WebSocket / HTTPUpgrade connections stay open forever on Railway (steadiest); XHTTP uses HTTP/2 multiplexing
 #    (fastest to open new connections) but Railway caps one HTTP request at 15 min, so it gets only 2 of the 12
