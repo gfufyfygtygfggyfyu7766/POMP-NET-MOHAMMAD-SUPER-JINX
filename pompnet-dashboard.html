@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080711"><title>POMP NET MOHAMMAD — SUPER JINX</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pompnet-motion.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#070710;--card:#10101d;--card2:#151426;--line:#29243e;--purple:#963cff;--blue:#168cff;--text:#f5f2ff;--muted:#9691ad;--green:#39dba4;--red:#ff647d}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% -10%,#51208a55,transparent 38%),radial-gradient(ellipse at 0% 40%,#0d4c7a22,transparent 35%),var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
@@ -70,4 +70,4 @@ async function loadSystem(){try{let j=await api("/api/system");$("systemInfo").t
 $("refreshSystem").onclick=loadSystem;
 async function loadAll(){ $("today").textContent=new Date().toLocaleString("fa-IR");try{await loadUsers()}catch(e){if(String(e.message).includes("401")||String(e.message).includes("Unauthorized")){$("loginMsg").textContent="نشست منقضی شده؛ دوباره وارد شوید.";token="";sessionStorage.removeItem("pomp_token");showLogin();return} $("recentRows").innerHTML="<tr><td colspan='4' class='empty'>خطای دریافت کاربران: "+esc(e.message)+"</td></tr>"}loadSystem()}
 if(token)showApp();
-</script></body></html>
+</script><script src="/pompnet-motion.js" defer></script></body></html>
