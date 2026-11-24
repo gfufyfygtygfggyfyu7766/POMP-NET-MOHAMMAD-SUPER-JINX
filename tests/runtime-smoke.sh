@@ -72,6 +72,15 @@ if grep -qi -- "SideRail" <<< "$DASHBOARD_HTML"; then
 fi
 echo "[smoke] independent POMP NET dashboard route: OK"
 
+# Verify the 24-scene animated layer is served from the built image (not only present in GitHub).
+MOTION_CSS="$(curl --fail --silent --show-error "$BASE/pompnet-motion.css")"
+MOTION_JS="$(curl --fail --silent --show-error "$BASE/pompnet-motion.js")"
+grep -q -- "#pompnet-motion" <<< "$MOTION_CSS"
+grep -q -- "requestAnimationFrame" <<< "$MOTION_JS"
+SCENE_COUNT="$(printf '%s' "$MOTION_JS" | grep -o '\["#' | wc -l)"
+test "$SCENE_COUNT" -ge 24 || { echo "Expected 24 animated scenes, found $SCENE_COUNT" >&2; exit 1; }
+echo "[smoke] animated dashboard assets + 24 scenes: OK"
+
 TOKEN="$(login)"
 echo "[smoke] admin login: OK"
 
