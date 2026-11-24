@@ -8,10 +8,11 @@ import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
-DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "admin").strip() or "admin"
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
+ADMIN_RECOVERY_MARKER = "/var/lib/marzban/.pompnet-admin-admin-recovery-v1"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = (os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
@@ -67,8 +68,8 @@ with GetDB() as db:
             except OSError:
                 DEFAULT_PW = secrets.token_urlsafe(32)
                 generated = True
-        if len(DEFAULT_PW) < 14:
-            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters", flush=True)
+        if len(DEFAULT_PW) < 14 and DEFAULT_PW != "admin":
+            print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters (or use the one-time default admin/admin)", flush=True)
             sys.exit(1)
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
@@ -86,6 +87,28 @@ with GetDB() as db:
             # Explicit ADMIN_PASSWORD values are not copied into a plaintext recovery file.
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
+    elif not os.path.exists(ADMIN_RECOVERY_MARKER):
+        # One-time recovery for existing installations. The marker prevents
+        # normal restarts from overwriting a password changed by the owner.
+        if len(ADMIN) < 3:
+            print("[admin] FATAL: ADMIN_USERNAME must contain at least 3 characters", flush=True)
+            sys.exit(1)
+        taken_by_reseller = any(x.username == ADMIN for x in panel_admins if x.username in RESELLERS)
+        if taken_by_reseller:
+            print("[admin] FATAL: username admin belongs to a reseller; rename that reseller before recovery", flush=True)
+            sys.exit(1)
+        a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
+        a.username = ADMIN
+        set_pw(a, "admin")
+        try:
+            fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                _f.write("completed" + chr(10))
+                _f.flush()
+                os.fsync(_f.fileno())
+        except FileExistsError:
+            pass
+        msg = "[admin] one-time login recovery applied: username=admin password=admin; change it immediately after login"
     elif RESET:
         if len(ADMIN) < 3:
             print("[admin] FATAL: ADMIN_USERNAME must contain at least 3 characters", flush=True)
