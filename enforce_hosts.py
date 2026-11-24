@@ -19,7 +19,27 @@ def _public_domain(value):
         return ""
     return value
 
-DOMAIN = _public_domain(os.environ.get("PANEL_DOMAIN")) or _public_domain(os.environ.get("RAILWAY_PUBLIC_DOMAIN"))
+# Detect the externally reachable hostname across common PaaS platforms.
+# Explicit PANEL_DOMAIN always wins; never guess a hostname from an internal container address.
+def _platform_domain():
+    candidates = [
+        os.environ.get("PANEL_DOMAIN"),
+        os.environ.get("PUBLIC_DOMAIN"),
+        os.environ.get("APP_DOMAIN"),
+        os.environ.get("RAILWAY_PUBLIC_DOMAIN"),
+        os.environ.get("RAILWAY_STATIC_URL"),
+        os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
+        os.environ.get("KOYEB_PUBLIC_DOMAIN"),
+        os.environ.get("FLY_PUBLIC_IP") and (os.environ.get("FLY_APP_NAME", "") + ".fly.dev"),
+        os.environ.get("HEROKU_APP_NAME") and (os.environ.get("HEROKU_APP_NAME", "") + ".herokuapp.com"),
+    ]
+    for candidate in candidates:
+        host = _public_domain(candidate)
+        if host:
+            return host
+    return ""
+
+DOMAIN = _platform_domain()
 CF_HOST = os.environ.get("CF_TUNNEL_HOSTNAME", "") if os.environ.get("CF_TUNNEL_TOKEN") else ""
 def _list(name, default=""):
     return [x.strip() for x in os.environ.get(name, default).replace(" ", ",").split(",") if x.strip()]
