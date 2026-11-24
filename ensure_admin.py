@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 # The panel owner login is intentionally fixed to the requested username.
 ADMIN = "admin"
-DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "admin").strip() or "admin"
+# Bootstrap password is fixed to the requested value; change it from the panel after login.
+DEFAULT_PW = "admin"
 # The requested bootstrap credential is intentionally weak. Permit this exact
 # value only; any other short password still requires explicit opt-in.
 ALLOW_INSECURE = (DEFAULT_PW == "admin" or os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on"))
