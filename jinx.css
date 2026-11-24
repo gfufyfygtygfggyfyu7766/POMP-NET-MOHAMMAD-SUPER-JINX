@@ -354,7 +354,7 @@ body:has(input[type=password]) form{
  text-align:center;direction:rtl;color:#f7f4ff;font-family:Vazirmatn,Tahoma,sans-serif
 }
 .pompnet-login-credit .pompnet-credit-line{display:block;color:#c9b2ff;font-size:12px;font-weight:700;margin-bottom:8px}
-.pompnet-login-credit .pompnet-brand-main{display:block;font-size:clamp(22px,5vw,31px);font-weight:900;letter-spacing:.2px;line-height:1.4;background:linear-gradient(95deg,#fff,#c8a7ff 48%,#80c8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pompnet-login-credit .pompnet-brand-main{display:block;font-size:clamp(18px,4.1vw,25px);font-weight:850;letter-spacing:1.05px;line-height:1.55;text-shadow:0 0 22px rgba(150,60,255,.12);background:linear-gradient(100deg,#f8f5ff 0%,#c8a7ff 46%,#80c8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .pompnet-login-credit .pompnet-brand-edition{display:inline-block;margin-top:5px;padding:3px 12px;border:1px solid rgba(150,60,255,.35);border-radius:999px;color:#9ecbff;font-size:10px;font-weight:800;letter-spacing:2px}
 .pompnet-login-credit a{color:#c7b2ff!important;text-decoration:none;border-bottom:1px solid rgba(150,60,255,.25)}
 .pompnet-login-credit a:hover{color:#fff!important}
@@ -366,3 +366,7 @@ body:has(input[type=password]) form{
  .pompnet-login-credit{margin:16px auto;padding:15px 12px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* Signature brand mark: slightly compact, refined tracking, clear hierarchy */
+.pompnet-login-credit .pompnet-brand-main{font-size:clamp(18px,4vw,24px)!important;letter-spacing:1.25px!important;font-weight:850!important}
+.pompnet-login-credit .pompnet-brand-edition{font-size:9px!important;letter-spacing:2.8px!important;padding:3px 13px!important;opacity:.94}
