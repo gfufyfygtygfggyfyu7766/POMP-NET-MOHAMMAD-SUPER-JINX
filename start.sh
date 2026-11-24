@@ -133,26 +133,11 @@ if [ -n "$PORT" ] && [ "$PORT" != "8080" ]; then
 else
   : > /etc/nginx/jinx-port.inc
 fi
+# Fail closed: never report a healthy panel while silently dropping every VPN route.
+# If the routing config is invalid, stop the deployment so the actual error is visible in Railway logs.
 if ! nginx -t; then
-  # safety net: never a dead deploy because of the web config -> plain panel on 8080 (skin/extras off until fixed)
-  echo "[start] WARNING: nginx config failed the test -> emergency config (panel only)"
-  cat > /etc/nginx/conf.d/marzban.conf <<'NGX'
-map $http_upgrade $conn_up { default upgrade; '' close; }
-server {
-  listen 8080 reuseport;
-  include /etc/nginx/jinx-port.inc;
-  absolute_redirect off;
-  location = / { return 302 /dashboard/; }
-  # /docs is disabled in production; use the live Marzban API endpoint for health.
-  location = /health { proxy_pass http://127.0.0.1:8000/dashboard/; proxy_set_header Host $host; add_header Cache-Control "no-store" always; }
-  location = /donate { return 301 /donate/; }
-  location = /donate/ { proxy_pass http://127.0.0.1:8090/jinx-api/donate-page; }
-  location = /donate/config.js { proxy_pass http://127.0.0.1:8090/jinx-api/donate-config.js; }
-  location / { proxy_pass http://127.0.0.1:8000; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection $conn_up;
-               proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto https; proxy_read_timeout 3600s; }
-}
-NGX
-  nginx -t
+  echo "[start] FATAL: nginx config is invalid; refusing to start a panel with non-working VPN links."
+  exit 1
 fi
 nginx
 
