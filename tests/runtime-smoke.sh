@@ -62,16 +62,16 @@ login() {
 start_panel
 wait_panel
 
-# Verify the independent POMP NET dashboard is served at the panel entry route.
-DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/panel/")"
-grep -q -- "POMP NET MOHAMMAD" <<< "$DASHBOARD_HTML"
-grep -q -- "SUPER JINX" <<< "$DASHBOARD_HTML"
-grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$DASHBOARD_HTML"
-if grep -qi -- "SideRail" <<< "$DASHBOARD_HTML"; then
-  echo "Unexpected third-party dashboard branding in the POMP NET UI" >&2
-  exit 1
-fi
-echo "[smoke] independent POMP NET dashboard route: OK"
+# Verify the real PasarGuard dashboard is served and receives the POMP NET skin.
+DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/dashboard/")"
+grep -q -- 'href="/jinx.css"' <<< "$DASHBOARD_HTML"
+grep -q -- 'src="/jinx.js"' <<< "$DASHBOARD_HTML"
+JINX_SCRIPT="$(curl --fail --silent --show-error "$BASE/jinx.js")"
+grep -q -- "POMP NET MOHAMMAD" <<< "$JINX_SCRIPT"
+grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$JINX_SCRIPT"
+JINX_STYLE="$(curl --fail --silent --show-error "$BASE/jinx.css")"
+grep -q -- "Vazirmatn" <<< "$JINX_STYLE"
+echo "[smoke] native PasarGuard dashboard + POMP NET skin: OK"
 
 # Verify the 24-scene animated layer is served from the built image (not only present in GitHub).
 MOTION_CSS="$(curl --fail --silent --show-error "$BASE/pompnet-motion.css")"
