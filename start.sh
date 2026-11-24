@@ -68,10 +68,12 @@ PY
 fi
 
 PUBLIC_DOMAIN="${PANEL_DOMAIN:-${RAILWAY_PUBLIC_DOMAIN:-$CF_TUNNEL_HOSTNAME}}"
-if [ -z "$XRAY_SUBSCRIPTION_URL_PREFIX" ] && [ -n "$PUBLIC_DOMAIN" ]; then
+if [ -n "$PUBLIC_DOMAIN" ]; then
+  # Railway terminates public TLS on its generated HTTPS domain and forwards HTTP to PORT=8080.
+  # Subscription URLs must use the public hostname without an internal or TCP-proxy port.
   export XRAY_SUBSCRIPTION_URL_PREFIX="https://$PUBLIC_DOMAIN"
 fi
-echo "[start] domain: ${PUBLIC_DOMAIN:-NOT SET} | subscription endpoint: ${XRAY_SUBSCRIPTION_URL_PREFIX:-NOT SET} (HTTPS port 2096)"
+echo "[start] domain: ${PUBLIC_DOMAIN:-NOT SET} | subscription endpoint: ${XRAY_SUBSCRIPTION_URL_PREFIX:-NOT SET} (Railway HTTPS)"
 [ -d /var/lib/marzban ] && touch /var/lib/marzban/.write-test && rm -f /var/lib/marzban/.write-test \
   || echo "[start] WARNING: /var/lib/marzban not writable"
 mountpoint -q /var/lib/marzban 2>/dev/null || echo "[start] WARNING: no Volume on /var/lib/marzban, data will reset on redeploy"
