@@ -1,6 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
-<title id="title">POMP NET MOHAMMAD</title><desc id="desc">Official POMP NET MOHAMMAD identity in black, neon purple and blue.</desc>
-<defs><linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8B35FF"/><stop offset="1" stop-color="#168CFF"/></linearGradient><linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#A96BFF"/><stop offset="1" stop-color="#39A8FF"/></linearGradient><radialGradient id="glow"><stop stop-color="#8B35FF" stop-opacity=".32"/><stop offset="1" stop-color="#050509" stop-opacity="0"/></radialGradient><filter id="soft"><feGaussianBlur stdDeviation="28"/></filter></defs>
-<rect width="1200" height="420" rx="34" fill="#050509"/><ellipse cx="190" cy="85" rx="310" ry="220" fill="url(#glow)" filter="url(#soft)"/><ellipse cx="1040" cy="350" rx="300" ry="230" fill="url(#glow)" filter="url(#soft)"/><rect x="24" y="24" width="1152" height="372" rx="28" fill="none" stroke="url(#edge)" stroke-opacity=".62" stroke-width="2"/><path d="M65 330 C290 245 390 365 610 300 S940 250 1135 170" fill="none" stroke="url(#edge)" stroke-width="2.5" opacity=".55"/>
-<g transform="translate(600 112)"><path d="M-34 -32 L0 -52 L34 -32 L34 20 L0 42 L-34 20 Z" fill="#0E0B18" stroke="url(#edge)" stroke-width="3"/><path d="M-13 18 V-22 H8 Q25 -22 25 -5 Q25 11 8 11 H-13" fill="none" stroke="url(#word)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="600" y="235" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="49" font-weight="800" letter-spacing="3">POMP NET MOHAMMAD</text><text x="600" y="292" text-anchor="middle" fill="url(#word)" font-family="Arial,sans-serif" font-size="31" font-weight="700" letter-spacing="5">SUPER JINX</text><text x="600" y="345" text-anchor="middle" fill="#B8B2CC" font-family="Arial,sans-serif" font-size="18" letter-spacing="1.5">قدرت ساخت، آزادی انتخاب، کنترل در دستان تو</text></svg>
+<title id="title">POMP NET MOHAMMAD</title><desc id="desc">POMP NET MOHAMMAD is the primary brand; SUPER JINX is the smaller product name.</desc>
+<defs>
+ <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8B35FF"/><stop offset="1" stop-color="#168CFF"/></linearGradient>
+ <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#A96BFF"/><stop offset="1" stop-color="#39A8FF"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#8B35FF" stop-opacity=".32"/><stop offset="1" stop-color="#050509" stop-opacity="0"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="28"/></filter>
+</defs>
+<rect width="1200" height="420" rx="34" fill="#050509"/>
+<ellipse cx="190" cy="85" rx="310" ry="220" fill="url(#glow)" filter="url(#soft)"/>
+<ellipse cx="1040" cy="350" rx="300" ry="230" fill="url(#glow)" filter="url(#soft)"/>
+<rect x="24" y="24" width="1152" height="372" rx="28" fill="none" stroke="url(#edge)" stroke-opacity=".62" stroke-width="2"/>
+<path d="M65 340 C290 255 390 375 610 310 S940 260 1135 180" fill="none" stroke="url(#edge)" stroke-width="2.5" opacity=".55"/>
+<g transform="translate(600 96)">
+ <path d="M-28 -27 L0 -44 L28 -27 L28 17 L0 35 L-28 17 Z" fill="#0E0B18" stroke="url(#edge)" stroke-width="3"/>
+ <path d="M-11 15 V-18 H7 Q21 -18 21 -4 Q21 9 7 9 H-11" fill="none" stroke="url(#word)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="600" y="220" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="70" font-weight="900" letter-spacing="2">POMP NET MOHAMMAD</text>
+<text x="600" y="273" text-anchor="middle" fill="url(#word)" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="4">SUPER JINX</text>
+<text x="600" y="333" text-anchor="middle" fill="#B8B2CC" font-family="Arial,sans-serif" font-size="19">قدرت ساخت، آزادی انتخاب، کنترل در دستان تو</text>
+</svg>
