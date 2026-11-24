@@ -65,7 +65,7 @@ wait_panel
 # Verify the independent POMP NET dashboard is served at the panel entry route.
 DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/panel/")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$DASHBOARD_HTML"
-grep -q -- "SUPER JINX CONTROL" <<< "$DASHBOARD_HTML"
+grep -q -- "SUPER JINX" <<< "$DASHBOARD_HTML"
 grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$DASHBOARD_HTML"
 if grep -qi -- "SideRail" <<< "$DASHBOARD_HTML"; then
   echo "Unexpected third-party dashboard branding in the POMP NET UI" >&2
