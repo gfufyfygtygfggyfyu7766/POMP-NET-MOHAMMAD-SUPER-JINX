@@ -10,30 +10,14 @@ APPLIED_MARKER = "/var/lib/marzban/.pompnet-default-admin-applied"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 
+# The owner password must be supplied as a Railway service secret.
+# Never generate a different password automatically and never print credentials to logs.
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 ALLOW_INSECURE = os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
 RESET = os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
 
-# If no deployment secret is supplied, create one strong password once and keep
-# it on the persistent Marzban volume. Only the first boot prints it to deploy logs.
 if not DEFAULT_PW:
-    try:
-        with open(PASSWORD_FILE, encoding="utf-8") as f:
-            DEFAULT_PW = f.read().strip()
-        if DEFAULT_PW:
-            os.chmod(PASSWORD_FILE, 0o600)
-    except FileNotFoundError:
-        DEFAULT_PW = secrets.token_urlsafe(32)
-        os.makedirs(os.path.dirname(PASSWORD_FILE), exist_ok=True)
-        fd = os.open(PASSWORD_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(DEFAULT_PW + "\n")
-            f.flush()
-            os.fsync(f.fileno())
-        print(f"[admin] ONE-TIME LOGIN username: {ADMIN} | password: {DEFAULT_PW}", flush=True)
-
-if not DEFAULT_PW:
-    print("[admin] FATAL: could not load or create the owner password", flush=True)
+    print("[admin] FATAL: set ADMIN_PASSWORD in Railway service Variables; no password was generated", flush=True)
     sys.exit(1)
 if len(DEFAULT_PW) < 14 and not ALLOW_INSECURE:
     print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters.", flush=True)
