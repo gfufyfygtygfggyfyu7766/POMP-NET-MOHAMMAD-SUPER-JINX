@@ -8,12 +8,12 @@ import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 # The panel owner login is intentionally fixed to the requested username.
-ADMIN = "admin"
+ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
 # Bootstrap password is fixed to the requested value; change it from the panel after login.
-DEFAULT_PW = "admin"
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 # The requested bootstrap credential is intentionally weak. Permit this exact
 # value only; any other short password still requires explicit opt-in.
-ALLOW_INSECURE = (DEFAULT_PW == "admin" or os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on"))
+ALLOW_INSECURE = os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
@@ -78,6 +78,16 @@ with GetDB() as db:
             sys.exit(1)
         if db.query(Admin).filter(Admin.username == ADMIN).first() is None:
             db.add(Admin(username=ADMIN, hashed_password=pwd.hash(DEFAULT_PW), is_sudo=True))
+            # Mark fresh installs as migrated immediately. Otherwise the next
+            # restart would run legacy recovery and overwrite the owner's password.
+            try:
+                fd = os.open(ADMIN_RECOVERY_MARKER, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                    _f.write("completed" + chr(10))
+                    _f.flush()
+                    os.fsync(_f.fileno())
+            except FileExistsError:
+                pass
             msg = f"[admin] first install: secure admin created for {ADMIN}"
             if generated:
                 try:
