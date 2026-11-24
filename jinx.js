@@ -1726,21 +1726,31 @@
 })();
 
 
-/* POMP NET MOHAMMAD — animated login credit */
+/* POMP NET MOHAMMAD — animated glass attribution inside the authenticated dashboard only.
+   It is deliberately never mounted on the login form. */
 (function(){
+ if(window.__pompnetPanelCredit) return; window.__pompnetPanelCredit=true;
  function mountCredit(){
   try {
-   if(!document.body || document.querySelector('.pompnet-login-credit')) return;
-   var pass=document.querySelector('input[type="password"]');
-   var side=document.querySelector('nav, [role="navigation"], aside');
-   if(!pass || side) return;
-   var box=document.createElement('div'); box.className='pompnet-login-credit';
-   box.innerHTML='<span class="pompnet-credit-line">به پنل پمپ نت محمد خوش آمدید</span><strong class="pompnet-brand-main">POMP NET MOHAMMAD</strong><span class="pompnet-brand-edition">SUPER JINX</span>';
-   document.body.appendChild(box);
+   if(!document.body || document.querySelector('.pompnet-panel-credit')) return;
+   var nav=document.querySelector('nav,[role="navigation"],aside');
+   if(!nav) return; // login screen has no authenticated panel navigation
+   var box=document.createElement('div'); box.className='pompnet-panel-credit'; box.setAttribute('role','note');
+   box.innerHTML='<span class="pnpc-dot"></span><b>کدنویسی و توسعه توسط تیم POMP NET MOHAMMAD</b><i>✦</i><span>با همراهی SUPER JINX</span>';
+   var main=document.querySelector('main,[role="main"]') || document.querySelector('.chakra-container') || nav.parentElement || document.body;
+   var head=main.querySelector && main.querySelector('header');
+   if(head && head.parentNode===main) head.insertAdjacentElement('afterend',box);
+   else main.insertBefore(box,main.firstChild);
   } catch(e) {}
  }
- if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountCredit); else mountCredit();
- setTimeout(mountCredit,1200);
+ function schedule(){ try{mountCredit()}catch(e){} }
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',schedule); else schedule();
+ var pending=false;
+ new MutationObserver(function(){
+  if(pending) return; pending=true;
+  setTimeout(function(){pending=false;schedule()},120);
+ }).observe(document.documentElement,{childList:true,subtree:true});
+ setTimeout(schedule,700); setTimeout(schedule,1800); setTimeout(schedule,3500);
 })();
 
 
