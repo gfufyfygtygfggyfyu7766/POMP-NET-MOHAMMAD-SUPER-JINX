@@ -79,7 +79,8 @@ def process(c, msg):
             if not re.fullmatch(r"[A-Za-z0-9_.-]{3,32}",name): return send(token,chat,"نام کاربری نامعتبر است.")
             gb=float(parts[2]); days=int(parts[3])
             if not (0.01<=gb<=100000 and 1<=days<=3650): return send(token,chat,"حجم باید 0.01 تا 100000 گیگ و زمان 1 تا 3650 روز باشد.")
-            payload={"username":name,"proxies":{"vless":{},"vmess":{},"trojan":{}},\n              "inbounds":{"vless":["VLESS WS"],"vmess":["VMESS WS"],"trojan":["TROJAN WS"]},
+            payload={"username":name,"proxies":{"vless":{},"vmess":{},"trojan":{}},
+              "inbounds":{"vless":["VLESS WS"],"vmess":["VMESS WS"],"trojan":["TROJAN WS"]},
               "expire":int(time.time())+days*86400,"data_limit":int(gb*1024**3),
               "data_limit_reset_strategy":"no_reset","status":"active"}
             d=api("/api/user",t,payload,"POST")
