@@ -71,8 +71,8 @@ def _ws_base():
             b = ""
     return b if _re.fullmatch(r"/cdn/[A-Za-z0-9-]{8,64}", b) else "/cdn/jinx"
 WSB = _ws_base()
-PATHS = {LOCKED_TAG: WSB + "?ed=2560", "VLESS WS": WSB + "/v?ed=2560", "VMESS WS": WSB + "/m?ed=2560",
-         "TROJAN WS": WSB + "/t?ed=2560", "VLESS HTTPUPGRADE": WSB + "/u?ed=2560", "VLESS XHTTP": WSB + "/x", "VLESS XHTTP SU": WSB + "/s"}
+PATHS = {LOCKED_TAG: WSB, "VLESS WS": WSB + "/v", "VMESS WS": WSB + "/m",
+         "TROJAN WS": WSB + "/t", "VLESS HTTPUPGRADE": WSB + "/u", "VLESS XHTTP": WSB + "/x", "VLESS XHTTP SU": WSB + "/s"}
 # paths of v12 and before: hosts that still have them are ours too and get moved to the new path
 OLD_PATHS = {LOCKED_TAG: "/panel-ws", "VLESS WS": "/vless", "VMESS WS": "/vmess", "TROJAN WS": "/trojan",
              "VLESS HTTPUPGRADE": "/vhu", "VLESS XHTTP": "/vxh", "VLESS XHTTP SU": ""}
