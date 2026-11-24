@@ -1761,6 +1761,28 @@
     b.innerHTML='<span aria-hidden="true" style="font-size:18px">🤖</span><span>ربات تلگرام POMP NET</span>';
     b.addEventListener("click",function(){location.href="/bot/";});
     menu.appendChild(b);
+    var items=[
+      ["👥","گپ و گروه پمپ‌نت","https://t.me/PompNett"],
+      ["📢","کانال رسمی پمپ‌نت","https://t.me/pompnet"],
+      ["⚡","کانال پروکسی","https://t.me/Myporoxy18"],
+      ["🛟","پشتیبانی تلگرام","https://t.me/NovaTunneli"]
+    ];
+    items.forEach(function(x){
+      var a=document.createElement("a");a.className="chakra-menu__menuitem pompnet-contact-menu";
+      a.href=x[2];a.target="_blank";a.rel="noopener noreferrer";a.setAttribute("role","menuitem");
+      a.style.cssText="display:flex;align-items:center;width:100%;gap:10px;padding:8px 14px;border:0;background:transparent;color:inherit;text-decoration:none;font:inherit;font-size:12px";
+      a.textContent=x[0]+" "+x[1];menu.appendChild(a);
+    });
+    var card=document.createElement("div");card.className="pompnet-card-menu";
+    card.style.cssText="margin:7px 10px;padding:9px;border-top:1px solid #49356b;font-size:11px;direction:rtl;color:inherit";
+    card.innerHTML='<div style="margin-bottom:5px">حمایت اختیاری از آقای محمدی</div><div style="display:flex;align-items:center;justify-content:space-between;gap:7px"><b dir="ltr" style="font:800 12px ui-monospace,monospace">6280231311605819</b><button type="button" style="border:1px solid #65439a;border-radius:7px;background:#211637;color:white;padding:5px 8px;cursor:pointer">کپی</button></div>';
+    card.querySelector("button").addEventListener("click",function(){
+      var value="6280231311605819",btn=this;
+      function done(){btn.textContent="کپی شد ✓";setTimeout(function(){btn.textContent="کپی"},1500)}
+      if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(value).then(done).catch(fallback);else fallback();
+      function fallback(){var t=document.createElement("textarea");t.value=value;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();try{document.execCommand("copy");done()}catch(e){btn.textContent="کپی نشد"}t.remove()}
+    });
+    menu.appendChild(card);
   }
   var ownerOk=null, checking=false;
   function scan(){
