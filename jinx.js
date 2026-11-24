@@ -1735,7 +1735,7 @@
    var side=document.querySelector('nav, [role="navigation"], aside');
    if(!pass || side) return;
    var box=document.createElement('div'); box.className='pompnet-login-credit';
-   box.innerHTML='<span class="pompnet-credit-line">به پنل پمپ نت محمد خوش آمدید</span><strong class="pompnet-brand-main">POMP NET MOHAMMAD</strong><span class="pompnet-brand-edition">SUPER JINX</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:13px;font-size:12px"><a href="https://t.me/NovaTunneli" target="_blank" rel="noopener">پشتیبانی تلگرام</a><a href="https://t.me/PompNett" target="_blank" rel="noopener">گروه پمپ‌نت</a><a href="https://t.me/pompnet" target="_blank" rel="noopener">کانال رسمی</a><a href="/donate/">حمایت مالی</a></div>';
+   box.innerHTML='<span class="pompnet-credit-line">به پنل پمپ نت محمد خوش آمدید</span><strong class="pompnet-brand-main">POMP NET MOHAMMAD</strong><span class="pompnet-brand-edition">SUPER JINX</span>';
    document.body.appendChild(box);
   } catch(e) {}
  }
@@ -1774,52 +1774,24 @@
 })();
 
 
-/* POMP NET MOHAMMAD — clean dashboard links + bank card; disable legacy donation UI */
+/* POMP NET MOHAMMAD — brand credit on the panel; contacts live only in the Telegram bot section */
 (function(){
-  if(window.__pompnetContactBarV1) return; window.__pompnetContactBarV1=true;
-  var CARD="6280231311605819";
-  var LINKS=[
-    ["👥","گپ و گروه پمپ‌نت","https://t.me/PompNett"],
-    ["📢","کانال رسمی پمپ‌نت","https://t.me/pompnet"],
-    ["⚡","کانال پروکسی","https://t.me/Myporoxy18"],
-    ["🛟","پشتیبانی تلگرام","https://t.me/NovaTunneli"]
-  ];
-  var css=document.createElement("style"); css.textContent=
-    "#jinx-don,#jinx-donfix,.jgh-d,a[href*=\"/donate\"],a[href*=\"#donation\"]{display:none!important;visibility:hidden!important;pointer-events:none!important}" +
-    "#pompnet-contact-panel{direction:rtl;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0 0 18px;padding:15px;border:1px solid #51347a;border-radius:17px;background:linear-gradient(135deg,#151022,#0a101c);box-shadow:0 10px 30px #0005;color:#f5f2ff;font-family:Vazirmatn,Tahoma,sans-serif}" +
-    "#pompnet-contact-panel .pncp-title{font-size:14px;font-weight:900;margin:0 0 2px;color:#fff}" +
-    "#pompnet-contact-panel .pncp-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}" +
-    "#pompnet-contact-panel a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 10px;border:1px solid #49356b;border-radius:11px;background:#111326;color:#f2eaff;text-decoration:none;font-size:12px;font-weight:800}" +
-    "#pompnet-contact-panel a:hover{border-color:#8b35ff;background:#1a1530}" +
-    "#pompnet-contact-panel .pncp-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #24558a;border-radius:12px;background:#0c1726;flex-wrap:wrap}" +
-    "#pompnet-contact-panel .pncp-number{direction:ltr;unicode-bidi:isolate;font:800 16px/1.5 ui-monospace,monospace;letter-spacing:1px;color:#9bcaff}" +
-    "#pompnet-contact-panel button{border:0;border-radius:9px;padding:9px 13px;background:linear-gradient(110deg,#8b35ff,#168cff);color:white;font:800 12px Vazirmatn,Tahoma,sans-serif;cursor:pointer}" +
-    "@media(max-width:480px){#pompnet-contact-panel .pncp-links{grid-template-columns:1fr}#pompnet-contact-panel{padding:12px}#pompnet-contact-panel .pncp-number{font-size:14px}}" ;
+  if(window.__pompnetBrandCreditV2) return; window.__pompnetBrandCreditV2=true;
+  var css=document.createElement("style");
+  css.textContent="#pompnet-brand-credit{direction:rtl;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 16px;padding:11px 14px;border:1px solid #51347a;border-radius:13px;background:linear-gradient(100deg,#151022,#0b1422);color:#d9c9f3;font:600 12px/1.9 Vazirmatn,Tahoma,sans-serif}#pompnet-brand-credit b{color:#fff;font-weight:900}#pompnet-brand-credit span{color:#a98be0}@media(max-width:600px){#pompnet-brand-credit{font-size:11px;padding:9px 11px}}";
   (document.head||document.documentElement).appendChild(css);
-  function removeLegacy(){
-    document.querySelectorAll('.login-support,a[href*="/donate"],a[href*="donation"]').forEach(function(n){var a=n.closest('a')||n;a.remove();});
-    document.querySelectorAll('[role="menuitem"],.chakra-menu__menuitem').forEach(function(n){if(/حمایت مالی|کمک مالی|donat(e|ion)|دونیت/i.test((n.textContent||'').trim()))n.remove();});
-    document.querySelectorAll('.pompnet-login-credit a').forEach(function(a){if(/donat|حمایت مالی|کمک مالی/i.test(a.textContent||''))a.remove();});
-  }
   function loginVisible(){return !!document.querySelector('input[type="password"]')||/login/i.test(location.pathname+location.hash);}
   function mount(){
-    removeLegacy();
-    if(loginVisible()||!document.body)return;
-    if(document.getElementById('pompnet-contact-panel'))return;
-    var host=document.querySelector('main')||document.querySelector('#root')||document.querySelector('#app')||document.body;
-    var box=document.createElement('section');box.id='pompnet-contact-panel';
-    var links=LINKS.map(function(x){return '<a href="'+x[2]+'" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">'+x[0]+'</span><span>'+x[1]+'</span></a>';}).join('');
-    box.innerHTML='<div class="pncp-title">ارتباط با POMP NET MOHAMMAD</div><div class="pncp-links">'+links+'</div><div class="pncp-card"><div><div style="font-size:11px;color:#aebbd0;margin-bottom:3px">شماره کارت حمایت از آقای محمدی</div><div class="pncp-number">'+CARD+'</div></div><button type="button" id="pncp-copy">کپی شماره کارت</button></div>';
-    var first=host.firstElementChild;if(first)host.insertBefore(box,first);else host.appendChild(box);
-    box.querySelector('#pncp-copy').addEventListener('click',function(){
-      var b=this;var done=function(){b.textContent='کپی شد ✓';setTimeout(function(){b.textContent='کپی شماره کارت';},1800);};
-      if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(CARD).then(done).catch(function(){fallback();});else fallback();
-      function fallback(){var t=document.createElement('textarea');t.value=CARD;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){b.textContent='کپی نشد؛ دستی وارد کنید';}t.remove();}
-    });
+    if(loginVisible()||!document.body||document.getElementById("pompnet-brand-credit")) return;
+    var host=document.querySelector("main")||document.querySelector("#root")||document.querySelector("#app");
+    if(!host) return;
+    var box=document.createElement("div");box.id="pompnet-brand-credit";
+    box.innerHTML='<b>کدنویسی و توسعه توسط تیم POMP NET MOHAMMAD</b><span>✦</span><span>با مشارکت SUPER JINX · هسته و زیرساخت اختصاصی پنل</span>';
+    host.insertBefore(box,host.firstElementChild||null);
   }
-  function run(){try{mount();}catch(e){}}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
-  var mo=new MutationObserver(function(){if(!document.getElementById('pompnet-contact-panel'))run();else removeLegacy();});
+  function run(){try{mount()}catch(e){}}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
+  var mo=new MutationObserver(function(){if(!document.getElementById("pompnet-brand-credit"))run()});
   if(document.documentElement)mo.observe(document.documentElement,{childList:true,subtree:true});
-  setInterval(run,1800);
+  setInterval(run,2000);
 })();
