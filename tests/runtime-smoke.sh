@@ -9,7 +9,8 @@ RESET_NAME="pompnet-jinx-reset-admin"
 VOLUME="pompnet-jinx-smoke-data"
 BASE="http://127.0.0.1:18080"
 ADMIN="ADMIN_tanel9990"
-PASSWORD="admin"
+PASSWORD="$(sed -n 's/^export ADMIN_PASSWORD="\(.*\)"$/\1/p' start.sh | head -n 1)"
+if [[ -z "$PASSWORD" ]]; then echo "Could not read configured owner password from start.sh" >&2; exit 1; fi
 USER="jinx_ci_smoke"
 
 AUTO_NAME="pompnet-jinx-auto-admin"
@@ -142,8 +143,8 @@ JX_ID_AFTER="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
 test "$JX_ID" = "$JX_ID_AFTER"
 echo "[smoke] database + secret subscription path survive container recreation: OK"
 
-# Fresh-install path with an explicit test-only weak password; production setup generates a strong password.
-# The password is hashed in SQLite and must survive container recreation on the same volume.
+# Fresh-install path: the image entrypoint configures the fixed POMP NET owner.
+# Read the expected password from start.sh rather than duplicating a credential in this test.
 docker volume create "$AUTO_VOLUME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
@@ -155,26 +156,21 @@ for _ in $(seq 1 120); do
   AUTO_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$AUTO_BASE/health" 2>/dev/null || true)"
   if [[ "$AUTO_STATUS" == "200" ]]; then AUTO_HEALTHY=1; break; fi
   if ! docker inspect -f '{{.State.Running}}' "$AUTO_NAME" 2>/dev/null | grep -q true; then
-    echo "Default-admin fresh install container exited before becoming healthy" >&2
+    echo "Fixed-admin fresh install container exited before becoming healthy" >&2
     docker logs "$AUTO_NAME" || true
     exit 1
   fi
   sleep 2
 done
-test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin fresh install did not become healthy" >&2; exit 1; }
+test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Fixed-admin fresh install did not become healthy" >&2; exit 1; }
 
-AUTO_LOGS="$(docker logs "$AUTO_NAME" 2>&1)"
-AUTO_PASSWORD="$(printf "%s\\n" "$AUTO_LOGS" | grep "ONE-TIME LOGIN" | tail -n 1 | sed "s/.*password: //")"
-test -n "$AUTO_PASSWORD" || { echo "No one-time password was generated" >&2; docker logs "$AUTO_NAME"; exit 1; }
-test "$AUTO_PASSWORD" != "admin"
-test "$(printf "%s" "$AUTO_PASSWORD" | wc -c)" -ge 32
 AUTO_TOKEN="$(curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  --data-urlencode "username=ADMIN_tanel9990" \
-  --data-urlencode "password=$AUTO_PASSWORD" \
+  --data-urlencode "username=$ADMIN" \
+  --data-urlencode "password=$PASSWORD" \
   | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 test -n "$AUTO_TOKEN"
-echo "[smoke] generated strong one-time admin password login: OK"
+echo "[smoke] configured POMP NET owner login on fresh install: OK"
 
 docker rm -f "$AUTO_NAME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
@@ -187,18 +183,18 @@ for _ in $(seq 1 120); do
   AUTO_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$AUTO_BASE/health" 2>/dev/null || true)"
   if [[ "$AUTO_STATUS" == "200" ]]; then AUTO_HEALTHY=1; break; fi
   if ! docker inspect -f '{{.State.Running}}' "$AUTO_NAME" 2>/dev/null | grep -q true; then
-    echo "Default-admin container exited after recreation" >&2
+    echo "Fixed-admin container exited after recreation" >&2
     docker logs "$AUTO_NAME" || true
     exit 1
   fi
   sleep 2
 done
-test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin container did not recover after recreation" >&2; exit 1; }
+test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Fixed-admin container did not recover after recreation" >&2; exit 1; }
 curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode "username=ADMIN_tanel9990" \
-  --data-urlencode "password=$AUTO_PASSWORD" \
-  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
+  --data-urlencode "username=$ADMIN" \
+  --data-urlencode "password=$PASSWORD" \
+  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] configured owner login survives container recreation: OK")'
 
 # Existing admin recovery path: an explicitly requested reset changes the existing owner password.
 # Stop the previous container first; never mount the same SQLite volume twice.
