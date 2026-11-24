@@ -71,7 +71,7 @@ for _ in $(seq 1 90); do
     echo
     echo "POMP NET SUPER JINX is responding over HTTPS."
     echo "Panel: https://$DOMAIN/dashboard/"
-    echo "Admin username: admin"
+    echo "Admin username: ADMIN_tanel9990"
     echo "Persistent admin password: $PASSWORD"
     echo "SAVE THIS PASSWORD NOW. It is also stored in the protected .env file and remains the same across restarts/redeploys that keep this project directory and Docker volume."
     echo "Project directory: $APP_DIR"
