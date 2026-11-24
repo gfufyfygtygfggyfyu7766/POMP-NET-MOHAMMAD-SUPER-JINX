@@ -86,8 +86,9 @@ docker exec "$NAME" python -c 'import json; c=json.load(open("/var/lib/marzban/x
 # The support page contains only the configured bank card and its copy action.
 DONATE_PAGE="$(curl --fail --silent --show-error "$BASE/donate/")"
 grep -q -- "حمایت پروژه" <<< "$DONATE_PAGE"
-grep -q -- "6280231311605819" <<< "$DONATE_PAGE"
 grep -q -- "کپی شماره کارت" <<< "$DONATE_PAGE"
+DONATE_CONFIG="$(curl --fail --silent --show-error "$BASE/donate/config.js")"
+grep -q -- 'bankCard: "6280231311605819"' <<< "$DONATE_CONFIG"
 if grep -q -- "هر بخش از POMP NET" <<< "$DONATE_PAGE"; then echo "Unexpected extra support text" >&2; exit 1; fi
 echo "[smoke] project support page shows bank card only: OK"
 
