@@ -48,9 +48,8 @@ if not re.fullmatch(r"(?=.{4,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9
     raise SystemExit(1)
 PY
 
-read -r -p "Admin username [pompadmin]: " ADMIN
-ADMIN="${ADMIN:-pompadmin}"
-[[ "$ADMIN" =~ ^[A-Za-z0-9_.@-]{3,32}$ ]] || fail "Admin username must be 3-32 allowed characters."
+# The owner account name is fixed by ensure_admin.py and must match the login UI.
+ADMIN="admin"
 PASSWORD="$(openssl rand -base64 36 | tr -d '\n')"
 
 umask 077
@@ -72,9 +71,9 @@ for _ in $(seq 1 90); do
     echo
     echo "POMP NET SUPER JINX is responding over HTTPS."
     echo "Panel: https://$DOMAIN/dashboard/"
-    echo "Admin username: $ADMIN"
-    echo "One-time generated password: $PASSWORD"
-    echo "SAVE THIS PASSWORD NOW. It is not printed into the repository."
+    echo "Admin username: admin"
+    echo "Persistent admin password: $PASSWORD"
+    echo "SAVE THIS PASSWORD NOW. It is also stored in the protected .env file and remains the same across restarts/redeploys that keep this project directory and Docker volume."
     echo "Project directory: $APP_DIR"
     exit 0
   fi
