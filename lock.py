@@ -39,7 +39,7 @@ def inbound(tag, port, net, settings):
             "settings": {"clients": [], "decryption": "none"},
             "streamSettings": dict({"network": net, "security": "none",
                                     "sockopt": {"tcpKeepAliveIdle": 30, "tcpKeepAliveInterval": 15}}, **settings),
-            "sniffing": {"enabled": True, "destOverride": ["http", "tls", "quic"], "routeOnly": True}}
+            "sniffing": {"enabled": False, "destOverride": []}}
 
 # 🔐 secret config path: /cdn/<random id> (start.sh makes it once and keeps it in the Volume)
 def ws_base():
@@ -52,6 +52,10 @@ def ws_base():
     return b if re.fullmatch(r"/cdn/[A-Za-z0-9-]{8,64}", b) else "/cdn/jinx"
 B = ws_base()
 SUB = {"VLESS WS": "/v", "VMESS WS": "/m", "TROJAN WS": "/t"}
+# SideRail-compatible core behavior: keep Xray sniffing disabled on every inbound.
+# Sniffing QUIC/HTTP on Railway's TLS edge can destabilize otherwise valid client sessions.
+for _ib in [locked] + base.get("inbounds", []):
+    _ib["sniffing"] = {"enabled": False, "destOverride": []}
 locked["streamSettings"]["wsSettings"]["path"] = B
 for _i in base.get("inbounds", []):
     _ws = (_i.get("streamSettings") or {}).get("wsSettings")
@@ -65,24 +69,20 @@ if os.environ.get("JINX_FAST", "1") != "0":
     # HTTPUpgrade: same path as WS through Railway/Cloudflare, but lighter (no WS framing) -> faster
     if ver >= (1, 8, 9) and marzban_knows("httpupgrade"):
         extra.append(inbound("VLESS HTTPUPGRADE", 2005, "httpupgrade", {"httpupgradeSettings": {"path": B + "/u"}}))
-    # XHTTP (or the older SplitHTTP): plain HTTP requests, passes any CDN, very stable on strict operators.
-    #   Same recipe as the Vodiwalker panel (runs on Railway): TWO XHTTP configs, each with its own fixed mode
-    #     packet-up  = many short uploads + one download stream (passes every web edge, best on strict operators)
-    #     stream-up  = one long upload + one download stream (fewer requests = higher speed)
-    #   ON by default (JINX_XHTTP=0 turns it off; its 2 names then move to HTTPUpgrade automatically).
+    # SideRail's fifth official HTTP inbound: one VLESS XHTTP inbound, mode=auto.
+    # Do not publish a second stream-up variant; clients and link generation use the same /x path.
     XH = os.environ.get("JINX_XHTTP", "1") != "0"
     if XH and ver >= (24, 11, 0) and marzban_knows("xhttp"):
-        extra.append(inbound("VLESS XHTTP", 2006, "xhttp", {"xhttpSettings": {"path": B + "/x", "mode": "packet-up"}}))
-        extra.append(inbound("VLESS XHTTP SU", 2007, "xhttp", {"xhttpSettings": {"path": B + "/s", "mode": "stream-up"}}))
-    elif XH and ver >= (1, 8, 16) and marzban_knows("splithttp"):
-        extra.append(inbound("VLESS XHTTP", 2006, "splithttp", {"splithttpSettings": {"path": B + "/x"}}))   # older Xray: packet style only
+        extra.append(inbound("VLESS XHTTP", 2006, "xhttp", {"xhttpSettings": {"path": B + "/x", "mode": "auto"}}))
 
 # Railway provides one raw TCP Proxy per service. Use it for Shadowsocks by default.
 # Set JINX_TCP_PROTOCOL=reality only if you prefer Reality instead; both cannot share this single TCP listener.
 TCP_TAG = "Shadowsocks TCP"
 REALITY_TAG = "VLESS REALITY"
 _RAILWAY_TCP_APP_PORT = 2010
-TCP_PROXY_READY = bool(os.environ.get("RAILWAY_TCP_PROXY_DOMAIN") and os.environ.get("RAILWAY_TCP_PROXY_PORT"))
+# SideRail's supported inbound set is HTTP-based only (WS, XHTTP, HTTPUpgrade).
+# Raw TCP Shadowsocks/Reality are intentionally not created on this Railway edge.
+TCP_PROXY_READY = False
 _tcp_port = _RAILWAY_TCP_APP_PORT if TCP_PROXY_READY else 0
 _tcp_mode = os.environ.get("JINX_TCP_PROTOCOL", "shadowsocks").strip().lower()
 if _tcp_port and _tcp_mode == "shadowsocks":
@@ -187,7 +187,7 @@ else:
     print("[lock] ad blocker off (no ads list in this image, or JINX_ADBLOCK=0)", flush=True)
 
 # order = order in the subscription: lightest / steadiest first (the locked inbound always stays first)
-_RANK = {locked["tag"]: 0, "Shadowsocks TCP": 1, "VLESS REALITY": 2, "VLESS HTTPUPGRADE": 3, "VLESS XHTTP": 4, "VLESS XHTTP SU": 5, "VLESS WS": 6, "TROJAN WS": 7, "VMESS WS": 8}
+_RANK = {locked["tag"]: 0, "Shadowsocks TCP": 1, "VLESS REALITY": 2, "VLESS HTTPUPGRADE": 3, "VLESS XHTTP": 4, "VLESS WS": 6, "TROJAN WS": 7, "VMESS WS": 8}
 base["inbounds"] = sorted(_keep, key=lambda i: _RANK.get(i["tag"], 50))
 
 # 🧷 TCP Fast Open: kept only if this server's kernel really accepts it (a refused socket option = no connection at all)
@@ -265,7 +265,7 @@ if ok:
 else:
     print(f"[lock] WARNING: xray refused the config: {why}", flush=True)
     import copy
-    EXTRAS = [("Reality", drop_inbound("VLESS REALITY")), ("XHTTP", lambda c: (drop_inbound("VLESS XHTTP")(c), drop_inbound("VLESS XHTTP SU")(c))),
+    EXTRAS = [("Reality", drop_inbound("VLESS REALITY")), ("XHTTP", drop_inbound("VLESS XHTTP")),
               ("HTTPUpgrade", drop_inbound("VLESS HTTPUPGRADE")), ("ad blocker", drop_adblock),
               ("BBR", drop_sockopt("tcpcongestion")), ("TCP Fast Open", drop_sockopt("tcpFastOpen")),
               ("WS heartbeat", drop_heartbeat)]
