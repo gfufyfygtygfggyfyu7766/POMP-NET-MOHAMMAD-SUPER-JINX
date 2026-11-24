@@ -1735,7 +1735,7 @@
    var side=document.querySelector('nav, [role="navigation"], aside');
    if(!pass || side) return;
    var box=document.createElement('div'); box.className='pompnet-login-credit';
-   box.innerHTML='<span class="pompnet-credit-line">به پنل پمپ نت محمد خوش آمدید</span><strong>SUPER JINX</strong><small>POMP NET MOHAMMAD</small><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px;font-size:12px"><a href="https://github.com/uxurx7rh7e7xr73uue73e8" target="_blank" rel="noopener">GitHub</a><a href="https://t.me/PompNett" target="_blank" rel="noopener">گروه</a><a href="https://t.me/pompnet" target="_blank" rel="noopener">کانال</a><a href="https://t.me/Myporoxy18" target="_blank" rel="noopener">پروکسی</a><a href="https://t.me/NovaTunneli" target="_blank" rel="noopener">@NovaTunneli</a><a href="https://t.me/developer_as" target="_blank" rel="noopener">@developer_as</a></div>';
+   box.innerHTML='<span class="pompnet-credit-line">به پنل پمپ نت محمد خوش آمدید</span><strong class="pompnet-brand-main">POMP NET MOHAMMAD</strong><span class="pompnet-brand-edition">SUPER JINX</span><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:13px;font-size:12px"><a href="https://t.me/NovaTunneli" target="_blank" rel="noopener">پشتیبانی تلگرام</a><a href="https://t.me/PompNett" target="_blank" rel="noopener">گروه پمپ‌نت</a><a href="https://t.me/pompnet" target="_blank" rel="noopener">کانال رسمی</a><a href="/donate/">حمایت مالی</a></div>';
    document.body.appendChild(box);
   } catch(e) {}
  }
