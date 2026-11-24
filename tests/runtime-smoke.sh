@@ -203,6 +203,8 @@ curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
 
 # Existing admin recovery path: explicit reset flag rotates the existing owner
 # to a fresh strong password without requiring the old password or a weak default.
+# Stop the previous container first; never mount the same SQLite volume twice.
+docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d --name "$RESET_NAME" \
   -p 127.0.0.1:18082:8080 \
   -v "$VOLUME:/var/lib/marzban" \
