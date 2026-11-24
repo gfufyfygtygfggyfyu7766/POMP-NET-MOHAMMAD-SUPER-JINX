@@ -17,7 +17,7 @@ COPY gate.inc /etc/nginx/gate.inc
 COPY nginx.conf /etc/nginx/conf.d/marzban.conf
 COPY nginx.conf /opt/jinx/nginx.conf.tpl
 COPY xray_config.json locked_inbound.json lock.py enforce_hosts.py ensure_admin.py doctor.py jinx_api.py /opt/
-COPY jinx.css jinx.js donate.html donate-config.js /opt/jinx/
+COPY jinx.css jinx.js donate.html donate-config.js bot.html /opt/jinx/
 COPY pompnet-dashboard.html /opt/jinx/pompnet-dashboard.html
 COPY pompnet-motion.css pompnet-motion.js /opt/jinx/
 COPY sub.html /opt/jinx/templates/subscription/index.html
@@ -35,6 +35,7 @@ RUN mkdir -p /opt/jinx/fonts \
       && for w in Regular Medium Bold; do f=$(find /tmp/vz -name "Vazirmatn-$w.woff2" | head -1); [ -n "$f" ] && cp "$f" /opt/jinx/fonts/; done \
       ; rm -rf /tmp/vz /tmp/vz.zip ) || echo "font download skipped, using system font" \
  && ls /opt/jinx/fonts
+COPY pompnet_telegram_bot.py /opt/pompnet_telegram_bot.py
 COPY start.sh /start.sh
 
 # fix Windows line endings, just in case
