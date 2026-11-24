@@ -1,19 +1,21 @@
 # Super JinX admin manager (runs on every start)
-#  - first install: creates admin as admin; ADMIN_PASSWORD overrides a generated one-time password
+#  - first install: creates admin/admin unless ADMIN_PASSWORD is explicitly set
 #  - generated first-login credentials are saved privately on the persistent data volume and printed once to deploy logs
-#  - existing installations receive the configured default admin credentials once
+#  - existing installations receive the admin/admin bootstrap credential once, then preserve later password changes
 #  - a marker on the persistent data volume prevents password changes on later restarts
 #  - creates a hidden internal admin for the support bots (random password, rotated every start)
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
-DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
-ALLOW_INSECURE = os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "admin").strip() or "admin"
+# The requested bootstrap credential is intentionally weak. Permit this exact
+# value only; any other short password still requires explicit opt-in.
+ALLOW_INSECURE = (DEFAULT_PW == "admin" or os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on"))
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
-ADMIN_RECOVERY_MARKER = "/var/lib/marzban/.pompnet-admin-admin-recovery-v1"
+ADMIN_RECOVERY_MARKER = "/var/lib/marzban/.pompnet-admin-admin-recovery-v2"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
 RESET = (os.environ.get("RESET_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
