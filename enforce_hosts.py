@@ -11,13 +11,18 @@ LOCKED_TAG = json.load(open("/opt/locked_inbound.json"))["tag"]
 LOCKED_REMARK = "Mohammad Pomp Net"                    # every config name starts with this
 OLD_REMARKS = ("محمد پمپ نت", "جینکس | 𝗝𝗶𝗻𝗫", "جینکس | 𝙎𝙪𝙥𝙚𝙧 𝗝𝗶𝗻𝗫")               # names of the previous version -> renamed automatically
 def _public_domain(value):
-    value = (value or "").strip().lower().rstrip(".")
-    # Reject documentation/example placeholders; never publish configs pointing at them.
-    if not value or value == "example.com" or value.endswith(".example.com"):
+    value = (value or "").strip()
+    # Accept a hostname or a platform URL, but store only its public hostname.
+    try:
+        parsed = urllib.parse.urlsplit(value if "://" in value else "//" + value)
+        host = (parsed.hostname or "").lower().rstrip(".")
+    except Exception:
         return ""
-    if "://" in value or "/" in value or ":" in value or " " in value:
+    # Reject placeholders, internal names, IP literals, and malformed hostnames.
+    if (not host or host == "example.com" or host.endswith(".example.com")
+            or "." not in host or not _re.fullmatch(r"[a-z0-9.-]+", host)):
         return ""
-    return value
+    return host
 
 # Detect the externally reachable hostname across common PaaS platforms.
 # Explicit PANEL_DOMAIN always wins; never guess a hostname from an internal container address.
@@ -30,7 +35,7 @@ def _platform_domain():
         os.environ.get("RAILWAY_STATIC_URL"),
         os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
         os.environ.get("KOYEB_PUBLIC_DOMAIN"),
-        os.environ.get("FLY_PUBLIC_IP") and (os.environ.get("FLY_APP_NAME", "") + ".fly.dev"),
+        os.environ.get("FLY_APP_NAME") and (os.environ.get("FLY_APP_NAME", "") + ".fly.dev"),
         os.environ.get("HEROKU_APP_NAME") and (os.environ.get("HEROKU_APP_NAME", "") + ".herokuapp.com"),
     ]
     for candidate in candidates:
