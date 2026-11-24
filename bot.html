@@ -16,12 +16,37 @@ button,a.btn{display:inline-block;border:0;border-radius:12px;padding:13px 18px;
 <label style="display:flex;gap:10px;align-items:center;margin-top:18px"><input id="enabled" type="checkbox" style="width:auto"> فعال‌سازی ربات</label>
 <button id="save">ذخیره تنظیمات</button><button id="test">تست اتصال تلگرام</button><a class="btn" href="/dashboard/">بازگشت به پنل</a>
 <div id="msg"></div>
+<section class="contact-card" aria-label="ارتباط و حمایت پمپ‌نت">
+<h2 style="font-size:17px;color:#c6a6ff;margin:0 0 8px">🌐 ارتباط با POMP NET MOHAMMAD</h2>
+<p class="muted" style="margin:0 0 12px">گپ، کانال‌ها و راه‌های پشتیبانی؛ همه رایگان و در دسترس هستند.</p>
+<div class="contact-links">
+<a class="btn" href="https://t.me/PompNett" target="_blank" rel="noopener noreferrer">👥 گپ و گروه پمپ‌نت</a>
+<a class="btn" href="https://t.me/pompnet" target="_blank" rel="noopener noreferrer">📢 کانال رسمی پمپ‌نت</a>
+<a class="btn" href="https://t.me/Myporoxy18" target="_blank" rel="noopener noreferrer">⚡ کانال پروکسی</a>
+<a class="btn" href="https://t.me/NovaTunneli" target="_blank" rel="noopener noreferrer">🛟 پشتیبانی تلگرام</a>
+</div>
+<div class="support-card"><div><small class="hint">حمایت اختیاری از آقای محمدی</small><div class="card-number" dir="ltr">6280231311605819</div></div><button type="button" id="copy-support-card">کپی شماره کارت</button></div>
+</section>
+<style>
+.contact-card{margin:18px 0;padding:18px;border:1px solid #51347a;border-radius:17px;background:linear-gradient(135deg,#151022,#0a101c)}
+.contact-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.contact-links .btn{margin:0;text-align:center;font-size:12px}
+.support-card{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;padding:12px;border:1px solid #24558a;border-radius:12px;background:#0c1726}
+.card-number{font:800 16px/1.7 ui-monospace,monospace;letter-spacing:1px;color:#9bcaff}
+@media(max-width:480px){.contact-links{grid-template-columns:1fr}.card-number{font-size:14px}}
+</style>
 <hr style="border:0;border-top:1px solid #3a2b55;margin:24px 0">
 <b>دستورهای ربات</b><p class="cmd">/status<br>/users<br>/new username GB days<br>/get username<br>/del username</p>
 <p class="hint">مثال ساخت کاربر: <code>/new ali 20 30</code> — کاربر در Marzban ثبت می‌شود و لینک اشتراک از همان API واقعی گرفته می‌شود. ایجاد کاربر از ربات فعلاً VLESS WS است.</p>
 </section></main>
 <script>
 const $=id=>document.getElementById(id), token=()=>localStorage.getItem("token")||"";
+$("copy-support-card").addEventListener("click",async function(){
+ const btn=this, value="6280231311605819";
+ try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(value);else{const t=document.createElement("textarea");t.value=value;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}btn.textContent="کپی شد ✓";setTimeout(()=>btn.textContent="کپی شماره کارت",1800)}
+ catch(e){btn.textContent="کپی نشد؛ دستی وارد کنید"}
+});
+
 async function req(method,body){const r=await fetch("/jinx-api/bot-config",{method,headers:{"Authorization":"Bearer "+token(),"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.detail||d.error||("HTTP "+r.status));return d}
 function msg(s,ok=false){$("msg").textContent=s;$("msg").style.color=ok?"#83f0b0":"#ff9eaa"}
 (async()=>{try{const d=await req("GET");$("enabled").checked=!!d.enabled;$("chat").value=(d.chat_ids||[]).join(",");$("token").placeholder=d.token_set?"توکن ذخیره شده؛ برای حفظ آن خالی بگذار":"توکن ربات را وارد کن";msg(d.token_set?"تنظیمات فعلی بارگذاری شد.": "توکن و Chat ID را وارد کن.");}catch(e){msg("خطا: "+e.message+" — فقط مالک پنل می‌تواند تنظیمات ربات را تغییر دهد.")}})();
