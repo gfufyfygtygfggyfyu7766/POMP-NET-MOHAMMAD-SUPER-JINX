@@ -8,7 +8,7 @@ import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
-DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "admin").strip() or "admin"
+DEFAULT_PW = "admin"  # requested one-time first-login credential; owner should change it immediately
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
