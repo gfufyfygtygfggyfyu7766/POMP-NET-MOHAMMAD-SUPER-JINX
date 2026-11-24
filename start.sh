@@ -4,8 +4,8 @@ echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
-# No hard-coded env login: the admin lives in the database, so a password changed in the panel really works.
-# (first install defaults to admin and generates a one-time strong password if ADMIN_PASSWORD is not supplied)
+# Admin credentials are stored as a bcrypt hash in the persistent database.
+# Bootstrap default: admin / admin. Set ADMIN_PASSWORD to override; change it after first login.
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
