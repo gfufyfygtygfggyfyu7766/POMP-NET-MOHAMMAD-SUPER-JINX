@@ -1,0 +1,67 @@
+name: POMP NET deployment validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate shell scripts
+        run: |
+          bash -n start.sh
+
+      - name: Validate Python syntax
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          files = [
+              Path("lock.py"),
+              Path("ensure_admin.py"),
+              Path("enforce_hosts.py"),
+              Path("doctor.py"),
+              Path("jinx_api.py"),
+              Path("pompnet_telegram_bot.py"),
+          ]
+          for path in files:
+              ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+              print(f"PYTHON OK: {path}")
+          PY
+
+      - name: Validate Xray and locked inbound JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          base = json.loads(Path("xray_config.json").read_text(encoding="utf-8"))
+          locked = json.loads(Path("locked_inbound.json").read_text(encoding="utf-8"))
+          assert isinstance(base.get("inbounds"), list) and base["inbounds"], "No base Xray inbounds"
+          assert locked.get("protocol") == "vless", "Locked inbound must be VLESS"
+          assert locked.get("port") == 2004, "Unexpected locked inbound port"
+          assert locked.get("listen") == "127.0.0.1", "Locked inbound must not bind publicly"
+          tags, ports = set(), set()
+          for inbound in [locked, *base["inbounds"]]:
+              assert inbound.get("tag") and inbound.get("port"), "Inbound missing tag/port"
+              assert inbound["tag"] not in tags, f"Duplicate inbound tag: {inbound['tag']}"
+              assert inbound["port"] not in ports, f"Duplicate inbound port: {inbound['port']}"
+              tags.add(inbound["tag"])
+              ports.add(inbound["port"])
+          print(f"Xray JSON OK: {len(tags)} base + locked inbound definitions")
+          PY
+
+      - name: Build the actual Railway Docker image
+        run: docker build --pull --tag pompnet-mohammad:ci .
