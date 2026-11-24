@@ -1785,6 +1785,7 @@
     ["🛟","پشتیبانی تلگرام","https://t.me/NovaTunneli"]
   ];
   var css=document.createElement("style"); css.textContent=
+    "#jinx-don,#jinx-donfix,.jgh-d,a[href*=\"/donate\"],a[href*=\"#donation\"]{display:none!important;visibility:hidden!important;pointer-events:none!important}" +
     "#pompnet-contact-panel{direction:rtl;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0 0 18px;padding:15px;border:1px solid #51347a;border-radius:17px;background:linear-gradient(135deg,#151022,#0a101c);box-shadow:0 10px 30px #0005;color:#f5f2ff;font-family:Vazirmatn,Tahoma,sans-serif}" +
     "#pompnet-contact-panel .pncp-title{font-size:14px;font-weight:900;margin:0 0 2px;color:#fff}" +
     "#pompnet-contact-panel .pncp-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}" +
@@ -1796,7 +1797,7 @@
     "@media(max-width:480px){#pompnet-contact-panel .pncp-links{grid-template-columns:1fr}#pompnet-contact-panel{padding:12px}#pompnet-contact-panel .pncp-number{font-size:14px}}" ;
   (document.head||document.documentElement).appendChild(css);
   function removeLegacy(){
-    document.querySelectorAll('#jinx-don,#jinx-donfix,.jgh-d,.login-support,a[href*="/donate"],a[href*="donation"]').forEach(function(n){var a=n.closest('a')||n;a.remove();});
+    document.querySelectorAll('.login-support,a[href*="/donate"],a[href*="donation"]').forEach(function(n){var a=n.closest('a')||n;a.remove();});
     document.querySelectorAll('[role="menuitem"],.chakra-menu__menuitem').forEach(function(n){if(/حمایت مالی|کمک مالی|donat(e|ion)|دونیت/i.test((n.textContent||'').trim()))n.remove();});
     document.querySelectorAll('.pompnet-login-credit a').forEach(function(a){if(/donat|حمایت مالی|کمک مالی/i.test(a.textContent||''))a.remove();});
   }
