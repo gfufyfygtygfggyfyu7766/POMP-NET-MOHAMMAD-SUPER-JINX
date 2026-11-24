@@ -4,10 +4,9 @@
 
 <br/>
 
-[![Brand](https://img.shields.io/badge/BRAND-POMP%20NET%20MOHAMMAD-8B35FF?style=for-the-badge)](https://github.com/uxurx7rh7e7xr73uue73e8)
-[![Core](https://img.shields.io/badge/CORE-MARZBAN-168CFF?style=for-the-badge)](https://github.com/Gozargah/Marzban)
-[![Engine](https://img.shields.io/badge/ENGINE-XRAY-8B35FF?style=for-the-badge)](https://github.com/XTLS/Xray-core)
-[![Status](https://img.shields.io/badge/STATUS-IN%20DEVELOPMENT-orange?style=for-the-badge)](#-وضعیت-واقعی-پروژه)
+**POMP NET MOHAMMAD** · <span style="color:#168CFF">SUPER JINX CONTROL PANEL</span><br/>
+<sub>هویت اختصاصی پمپ‌نت · مشکی، بنفش نئونی و آبی نئونی</sub><br/><br/>
+[Marzban Core](https://github.com/Gozargah/Marzban) · [Xray Engine](https://github.com/XTLS/Xray-core) · [وضعیت پروژه](#-وضعیت-واقعی-پروژه)
 
 ### قدرت ساخت، آزادی انتخاب، کنترل در دستان تو
 
