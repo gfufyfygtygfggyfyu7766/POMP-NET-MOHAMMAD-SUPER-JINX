@@ -1742,3 +1742,29 @@
  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountCredit); else mountCredit();
  setTimeout(mountCredit,1200);
 })();
+
+
+/* 🤖 POMP NET MOHAMMAD — owner-only Telegram bot entry in the native dashboard menu */
+(function(){
+  if(window.__pompnetBotMenu) return; window.__pompnetBotMenu=true;
+  function owner(){
+    var t=""; try{t=localStorage.getItem("token")||""}catch(e){}
+    if(!t) return Promise.resolve(false);
+    return fetch("/api/admin",{headers:{Authorization:"Bearer "+t}}).then(function(r){return r.ok?r.json():null})
+      .then(function(a){return !!(a&&a.is_sudo)}).catch(function(){return false});
+  }
+  function add(menu){
+    if(!menu||menu.querySelector(".pompnet-bot-menu")) return;
+    var b=document.createElement("button"); b.type="button"; b.className="chakra-menu__menuitem pompnet-bot-menu";
+    b.setAttribute("role","menuitem"); b.setAttribute("tabindex","-1");
+    b.style.cssText="display:flex;align-items:center;width:100%;gap:12px;padding:9px 14px;border:0;background:transparent;color:inherit;text-align:right;cursor:pointer;font:inherit";
+    b.innerHTML='<span aria-hidden="true" style="font-size:18px">🤖</span><span>ربات تلگرام POMP NET</span>';
+    b.addEventListener("click",function(){location.href="/bot/";});
+    menu.appendChild(b);
+  }
+  function scan(){owner().then(function(ok){if(!ok)return;document.querySelectorAll('[role="menu"]').forEach(add);});}
+  var mo=new MutationObserver(function(){if(document.querySelector('[role="menu"]'))scan();});
+  function boot(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});scan();}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+  setInterval(scan,1800);
+})();
