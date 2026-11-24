@@ -14,7 +14,7 @@ services:
       PANEL_DOMAIN: ${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
       ADMIN_USERNAME: ${ADMIN_USERNAME:?Set ADMIN_USERNAME in .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
-      XRAY_SUBSCRIPTION_URL_PREFIX: https://${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}
+      XRAY_SUBSCRIPTION_URL_PREFIX: https://${PANEL_DOMAIN:?Set PANEL_DOMAIN in .env}:2096
       SQLALCHEMY_DATABASE_URL: sqlite:////var/lib/marzban/db.sqlite3
       XRAY_JSON: /var/lib/marzban/xray_config.json
       JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-43200}
@@ -42,6 +42,7 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      - "2096:2096"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
