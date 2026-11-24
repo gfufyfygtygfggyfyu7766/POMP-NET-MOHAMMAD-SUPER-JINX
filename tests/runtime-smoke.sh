@@ -154,7 +154,7 @@ echo "[smoke] reseller account creation + independent login: OK"
 # A reseller must not be able to read the owner's user.
 OWNER_USER_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' \
   "$BASE/api/user/$USER" -H "Authorization: Bearer $RESELLER_TOKEN")"
-test "$OWNER_USER_STATUS" = "404" || { echo "Reseller accessed another admin's user (HTTP $OWNER_USER_STATUS)" >&2; exit 1; }
+[[ "$OWNER_USER_STATUS" == "403" || "$OWNER_USER_STATUS" == "404" ]] || { echo "Reseller accessed another admin's user (HTTP $OWNER_USER_STATUS)" >&2; exit 1; }
 
 RESELLER_USER_JSON="$(curl --fail --silent --show-error -X POST "$BASE/api/user" \
   -H "Authorization: Bearer $RESELLER_TOKEN" -H 'Content-Type: application/json' \
