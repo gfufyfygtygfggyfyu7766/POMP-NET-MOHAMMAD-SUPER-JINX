@@ -24,7 +24,7 @@ jobs:
 
       - name: Reject fake subscription configs
         run: |
-          if grep -Eq 'vless://demo@|trojan://demo@|74 ms|DEMO = true' sub.html; then
+          if grep -Eq 'vless://demo@|trojan://demo@|st\.ping[[:space:]]*=[[:space:]]*74|DEMO[[:space:]]*=[[:space:]]*true' sub.html; then
             echo "Fake/demo VPN subscription data must never ship."
             exit 1
           fi
