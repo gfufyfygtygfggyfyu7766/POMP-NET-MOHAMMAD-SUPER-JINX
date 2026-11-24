@@ -6,9 +6,14 @@
    - kind: evm | btc | tron | ton      color: #RRGGBB
    =================================================================== */
 var JINX_DONATE = {
-  brand: "Super JinX",
-  channel: "https://t.me/Super_Jinx",
-  intro: "اگر این پروژه برای شما مفید بوده، می‌توانید با حمایت مالی به ادامه توسعه و بهبود آن کمک کنید.",
+  brand: "POMP NET MOHAMMAD",
+  edition: "SUPER JINX",
+  supportName: "آقای محمدی",
+  bankCard: "6280231311605819",
+  bankIntro: "اگر این پنل برایتان مفید بوده، حمایت شما چراغ ادامه‌ی مسیر است؛ هر همراهی، حتی کوچک، به بهتر شدن خدمات و توسعه‌ی POMP NET کمک می‌کند.",
+  supportTelegram: "https://t.me/NovaTunneli",
+  channel: "https://t.me/pompnet",
+  intro: "قدرت ساخت، آزادی انتخاب، کنترل در دستان تو؛ اگر این مسیر برایت مفید بوده، همراهی تو به ادامه‌ی توسعه‌ی POMP NET جان می‌دهد.",
   intro_en: "If this project has been useful to you, you can help its development and improvement continue with a donation.",
   coins: [
     { id: "bnb",  name: "BNB",      symbol: "BNB",  network: "BNB Smart Chain", standard: "BEP20", kind: "evm",  color: "#F3BA2F", address: "0x2cb214Cbcf48cf5f4C98abcCD5B261eFD166adf2" },
