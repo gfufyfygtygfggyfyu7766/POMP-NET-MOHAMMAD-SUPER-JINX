@@ -438,7 +438,7 @@ function JinxTextBase(fa) {
     guide: "راهنمای اتصال", g: ["از بخش «افزودن به برنامه» برنامه‌ی مناسب دستگاهت را دریافت کن.", "روی «افزودن» بزن تا اشتراک خودکار اضافه شود.",
       "در برنامه تست پینگ بگیر و سریع‌ترین کانفیگ را انتخاب کن.", "برای دریافت تغییرات، «به‌روزرسانی اشتراک» را در برنامه بزن."],
     join: "عضویت در کانال", joinD: "اخبار، سرورهای جدید و اطلاعیه‌ها", joinGo: "عضویت", liveTag: "رسمی",
-    conn: "اتصال", connOn: "متصل", connRecent: "اخیراً", connOff: "آفلاین", ping: "پینگ سرور", count: "کانفیگ",
+    conn: "اتصال", connOn: "متصل", connRecent: "اخیراً", connOff: "آفلاین", ping: "پینگ پنل", count: "کانفیگ",
     bot: "پشتیبان هوشمند", botD: "صفحه، سرور و اتصال را خودکار بررسی و مشکلات را رفع می‌کند", botIdle: "در حال بررسی خودکار…", botRun: "عیب‌یابی",
     demo: "پیش‌نمایش با داده‌ی نمونه — روی سرور اطلاعات واقعی نمایش داده می‌شود"
   } : {
@@ -457,7 +457,7 @@ function JinxTextBase(fa) {
     guide: "How to connect", g: ["Get a suitable app from “Add to an app”.", "Tap “Add” to import the subscription automatically.",
       "Run a ping test in the app and pick the fastest config.", "Tap “Update subscription” in the app to receive changes."],
     join: "Join our channel", joinD: "News, new servers and announcements", joinGo: "Join", liveTag: "Official",
-    conn: "Connection", connOn: "Online", connRecent: "Recently", connOff: "Offline", ping: "Server ping", count: "Configs",
+    conn: "Connection", connOn: "Online", connRecent: "Recently", connOff: "Offline", ping: "Panel response", count: "Configs",
     bot: "Smart support", botD: "Checks the page, server and connection and fixes problems automatically", botIdle: "Running automatic check…", botRun: "Diagnose",
     demo: "Preview with sample data — real data is shown on the server"
   };
@@ -833,16 +833,10 @@ function isDesk() { try { return window.matchMedia("(min-width:900px)").matches;
   /* ---------- data ---------- */
   var raw = $("jinx-data").textContent, D = null, DEMO = false;
   try { D = JSON.parse(raw); } catch (e) { D = null; }
-  if (!D || typeof D !== "object" || raw.indexOf("{" + "{") >= 0) {
-    DEMO = true;
-    var t0 = Math.floor(Date.now() / 1000);
-    D = { username: "ali_jinx", status: "active", used: 14.62 * 1073741824, limit: 50 * 1073741824, expire: t0 + 23 * 86400 + 5 * 3600 + 17 * 60,
-      reset: "month", online: new Date(Date.now() - 40000).toISOString(), hold: 0, sub: "/sub/demo",
-      links: ["vless://demo@5.6.7.8:443?type=ws&security=tls&sni=" + location.hostname + "#" + encodeURIComponent("جینکس | 𝗝𝗶𝗻𝗫 ✦ 🚀 Turbo Iran · JinX Core"),
-        "vless://demo@104.16.1.1:443?type=ws&security=tls&sni=cf.example.com#" + encodeURIComponent("جینکس | 𝗝𝗶𝗻𝗫 ✦ 🌩 Cloud Storm 443 · XHTTP"),
-        "vless://demo@" + (location.hostname || "panel.example.com") + ":443?type=ws&security=tls#" + encodeURIComponent("جینکس | 𝗝𝗶𝗻𝗫 ✦ 🇳🇱 Amsterdam Rocket · JinX Core"),
-        "vless://demo@" + (location.hostname || "panel.example.com") + ":443?type=ws&security=tls&fragment=10-20%2C10-20%2Ctlshello#" + encodeURIComponent("جینکس | 𝗝𝗶𝗻𝗫 ✦ 👻 Ghost Anti-Filter · JinX Core"),
-        "trojan://demo@" + (location.hostname || "panel.example.com") + ":443?type=ws&security=tls#" + encodeURIComponent("جینکس | 𝗝𝗶𝗻𝗫 ✦ 🔱 Trident · Trojan")] };
+  /* Fail closed: never invent sample users, fake VPN links, or a fake 74 ms ping. */
+  if (!D || typeof D !== "object" || raw.indexOf("{" + "{") >= 0 || !Array.isArray(D.links)) {
+    document.body.innerHTML = '<main dir="rtl" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#080711;color:#f5f2ff;font-family:Tahoma,sans-serif;text-align:center"><section style="max-width:520px;padding:28px;border:1px solid #8b35ff66;border-radius:20px;background:#151326"><h2>اطلاعات اشتراک در دسترس نیست</h2><p style="line-height:2;color:#bbb">پنل هنوز اطلاعات واقعی کاربر و کانفیگ‌ها را ارسال نکرده است. هیچ کانفیگ آزمایشی ساخته نشده؛ چند لحظه بعد صفحه را دوباره باز کنید یا با پشتیبانی تماس بگیرید.</p><a href="/dashboard/" style="color:#9d75ff">بازگشت به پنل</a></section></main>';
+    return;
   }
   var S = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   var ua = navigator.userAgent || "";
