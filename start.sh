@@ -69,7 +69,7 @@ fi
 
 PUBLIC_DOMAIN="${PANEL_DOMAIN:-${RAILWAY_PUBLIC_DOMAIN:-$CF_TUNNEL_HOSTNAME}}"
 if [ -z "$XRAY_SUBSCRIPTION_URL_PREFIX" ] && [ -n "$PUBLIC_DOMAIN" ]; then
-  export XRAY_SUBSCRIPTION_URL_PREFIX="https://$PUBLIC_DOMAIN:2096"
+  export XRAY_SUBSCRIPTION_URL_PREFIX="https://$PUBLIC_DOMAIN"
 fi
 echo "[start] domain: ${PUBLIC_DOMAIN:-NOT SET} | subscription endpoint: ${XRAY_SUBSCRIPTION_URL_PREFIX:-NOT SET} (HTTPS port 2096)"
 [ -d /var/lib/marzban ] && touch /var/lib/marzban/.write-test && rm -f /var/lib/marzban/.write-test \
