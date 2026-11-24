@@ -370,3 +370,128 @@ body:has(input[type=password]) form{
 /* Signature brand mark: slightly compact, refined tracking, clear hierarchy */
 .pompnet-login-credit .pompnet-brand-main{font-size:clamp(18px,4vw,24px)!important;letter-spacing:1.25px!important;font-weight:850!important}
 .pompnet-login-credit .pompnet-brand-edition{font-size:9px!important;letter-spacing:2.8px!important;padding:3px 13px!important;opacity:.94}
+
+
+/* ==========================================================
+   POMP NET × MARZBANUPDATE × SUPER JINX
+   Unified visual system: midnight black, electric indigo,
+   POMP purple and clean cyan. Visual-only; no feature hiding.
+   ========================================================== */
+:root{
+  --pomp-bg:#070812;
+  --pomp-panel:#101322;
+  --pomp-panel-raised:#151a2d;
+  --pomp-line:rgba(107,123,255,.24);
+  --pomp-purple:#8b35ff;
+  --pomp-indigo:#5b6cff;
+  --pomp-cyan:#22d3ee;
+  --pomp-blue:#168cff;
+  --pomp-text:#f4f5ff;
+  --pomp-muted:#a5acc5;
+  --pomp-glow:0 16px 42px rgba(0,0,0,.34),0 0 28px rgba(91,108,255,.08);
+  --pomp-gradient:linear-gradient(112deg,#8b35ff 0%,#5b6cff 54%,#22d3ee 100%);
+}
+html{background:var(--pomp-bg)}
+body{
+ background:
+  radial-gradient(ellipse at 8% 0%,rgba(91,108,255,.13),transparent 34%),
+  radial-gradient(ellipse at 96% 12%,rgba(34,211,238,.07),transparent 28%),
+  var(--pomp-bg)!important;
+ color:var(--pomp-text);
+}
+::selection{background:rgba(91,108,255,.38);color:#fff}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#5b6cff,#22d3ee)}
+/* Unified surfaces: solid enough for readability, with restrained neon edges */
+.chakra-card,.chakra-stat,.chakra-alert,.chakra-tabs__tab-panel,
+.chakra-accordion__panel,.chakra-modal__content,
+.chakra-menu__menu-list,.chakra-popover__content{
+ background:linear-gradient(145deg,rgba(20,24,43,.98),rgba(12,15,28,.98))!important;
+ border:1px solid var(--pomp-line)!important;
+ border-radius:18px!important;
+ box-shadow:var(--pomp-glow)!important;
+}
+.chakra-card,.chakra-stat{position:relative;overflow:hidden}
+.chakra-card:after{
+ content:"";position:absolute;inset:0 0 auto;height:1px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,rgba(34,211,238,.55),rgba(91,108,255,.7),transparent);
+}
+/* Sidebar / navigation: deep indigo with a cyan active marker */
+nav,aside,[role="navigation"]{
+ background:linear-gradient(180deg,#11152a 0%,#090b16 100%)!important;
+ border-inline-end:1px solid rgba(91,108,255,.25)!important;
+}
+nav a,aside a,[role="navigation"] a{
+ border-radius:12px!important;margin-block:3px;transition:background .2s ease,box-shadow .2s ease;
+}
+nav a:hover,aside a:hover,[role="navigation"] a:hover,
+nav a[aria-current="page"],aside a[aria-current="page"],
+[role="navigation"] a[aria-current="page"]{
+ background:linear-gradient(100deg,rgba(91,108,255,.22),rgba(139,53,255,.15),rgba(34,211,238,.07))!important;
+ box-shadow:inset 3px 0 0 var(--pomp-cyan),0 6px 20px rgba(0,0,0,.18)!important;
+}
+/* Buttons: shared purple-indigo-cyan signature */
+.chakra-button[color-scheme="purple"],.chakra-button[color-scheme="blue"],
+button[type="submit"],form [type="submit"]{
+ background:var(--pomp-gradient)!important;color:#fff!important;border:0!important;
+ box-shadow:0 8px 24px rgba(91,108,255,.22)!important;
+}
+.chakra-button:hover,button:hover,[role="button"]:hover{filter:brightness(1.09)}
+/* Inputs retain high contrast and obvious focus state */
+.chakra-input,.chakra-select,.chakra-textarea,input,select,textarea{
+ background:#0a0e1c!important;color:var(--pomp-text)!important;
+ border:1px solid rgba(107,123,255,.3)!important;border-radius:12px!important;
+}
+.chakra-input:focus,.chakra-select:focus,.chakra-textarea:focus,
+input:focus,select:focus,textarea:focus{
+ border-color:var(--pomp-cyan)!important;
+ box-shadow:0 0 0 3px rgba(34,211,238,.13)!important;
+}
+/* Tables: cleaner hierarchy and readable striped rows */
+.chakra-table__container{border:1px solid var(--pomp-line);border-radius:15px;background:#0b0f1d}
+.chakra-table thead th{background:#171d36!important;color:#dce4ff!important}
+.chakra-table tbody tr:nth-child(even){background:rgba(91,108,255,.035)}
+.chakra-table tbody tr:hover{background:rgba(34,211,238,.07)!important}
+/* Stats and badges use both project palettes without pink */
+.chakra-stat__number{font-weight:900!important;letter-spacing:-.7px}
+.chakra-stat__label,small,.chakra-form__helper-text{color:var(--pomp-muted)!important}
+.chakra-badge{border-radius:999px;font-weight:750}
+a{ text-decoration-color:rgba(34,211,238,.4);text-underline-offset:3px }
+/* Login keeps the compact POMP NET MOHAMMAD / SUPER JINX signature */
+body:has(input[type="password"]) form{
+ background:linear-gradient(145deg,#171b32 0%,#0b0e1b 100%)!important;
+ border:1px solid rgba(91,108,255,.38)!important;
+ box-shadow:0 28px 90px rgba(0,0,0,.52),0 0 42px rgba(91,108,255,.13)!important;
+}
+.pompnet-login-credit{
+ border-color:rgba(91,108,255,.38)!important;
+ background:linear-gradient(112deg,rgba(20,24,45,.98),rgba(10,15,29,.98))!important;
+ box-shadow:0 16px 46px rgba(0,0,0,.32),0 0 28px rgba(34,211,238,.07)!important;
+}
+.pompnet-login-credit .pompnet-brand-main{
+ background:linear-gradient(100deg,#fff 0%,#c9cfff 42%,#9befff 100%)!important;
+ -webkit-background-clip:text!important;background-clip:text!important;
+}
+.pompnet-login-credit .pompnet-brand-edition{
+ border-color:rgba(34,211,238,.34)!important;color:#9befff!important;
+}
+/* Preserve the source projects' useful mobile and RTL behavior */
+[dir="rtl"] .chakra-modal__close-btn{right:auto!important;left:12px!important}
+[dir="rtl"] .chakra-select__icon-wrapper{right:auto!important;left:.5rem!important}
+[dir="rtl"] .chakra-select{padding-inline-start:1rem!important;padding-inline-end:2rem!important}
+[dir="rtl"] input,[dir="rtl"] textarea{text-align:start}
+.chakra-table__container{-webkit-overflow-scrolling:touch}
+.chakra-menu__menu-list,.chakra-popover__content{max-width:92vw!important;max-height:70vh;overflow-y:auto}
+@media(max-width:768px){
+ .chakra-container{padding-inline:12px!important;max-width:100%!important}
+ header,.chakra-button__group{flex-wrap:wrap!important;gap:8px}
+ input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]),
+ select,textarea,.chakra-input,.chakra-select,.chakra-textarea{font-size:16px!important;min-height:42px}
+ .chakra-button{min-height:40px}
+ .chakra-icon-button{min-width:40px;min-height:40px}
+ .chakra-modal__content-container{align-items:flex-start!important}
+ .chakra-modal__content{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;margin:8px auto!important}
+ .chakra-modal__footer{flex-wrap:wrap;gap:8px}
+ .chakra-modal__footer .chakra-button{flex:1 1 auto}
+ .chakra-form-control{width:100%!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
