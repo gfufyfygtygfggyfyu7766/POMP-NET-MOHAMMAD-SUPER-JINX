@@ -71,7 +71,7 @@ with GetDB() as db:
                 pass
             msg = f"[admin] first install: explicit admin credentials configured for {ADMIN}"
         else:
-            msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
+            msg = "[admin] WARNING: only reseller admins exist; rename the conflicting reseller account to recover"
     elif not os.path.exists(ADMIN_RECOVERY_MARKER):
         taken_by_reseller = any(x.username == ADMIN for x in panel_admins if x.username in RESELLERS)
         if taken_by_reseller:
@@ -89,18 +89,17 @@ with GetDB() as db:
         except FileExistsError:
             pass
         msg = f"[admin] one-time recovery applied for {ADMIN}"
-    elif RESET:
+    else:
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         taken = any(x.username == ADMIN and x is not a for x in panel_admins)
         if not taken:
             a.username = ADMIN
         set_pw(a, DEFAULT_PW)
-        msg = f"[admin] credentials rotated for {a.username}; remove RESET_ADMIN_PASSWORD after successful login"
+        msg = f"[admin] fixed owner credentials enforced for {a.username}"
     else:
         if not sudo:
             owners[0].is_sudo = True
-        msg = "[admin] owner username/password preserved; set RESET_ADMIN_PASSWORD=1 for a one-time credential reset"
-    sys_pw = secrets.token_urlsafe(24)
+            sys_pw = secrets.token_urlsafe(24)
     s = db.query(Admin).filter(Admin.username == SYSTEM).first()
     if s is None:
         db.add(Admin(username=SYSTEM, hashed_password=pwd.hash(sys_pw), is_sudo=True))
