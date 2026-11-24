@@ -24,15 +24,7 @@
           "tcpKeepAliveInterval": 15
         }
       },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ],
-        "routeOnly": true
-      }
+      "sniffing": { "enabled": false, "destOverride": [] }
     },
     {
       "tag": "VMESS WS",
@@ -54,15 +46,7 @@
           "tcpKeepAliveInterval": 15
         }
       },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ],
-        "routeOnly": true
-      }
+      "sniffing": { "enabled": false, "destOverride": [] }
     },
     {
       "tag": "TROJAN WS",
@@ -84,15 +68,7 @@
           "tcpKeepAliveInterval": 15
         }
       },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ],
-        "routeOnly": true
-      }
+      "sniffing": { "enabled": false, "destOverride": [] }
     }
   ],
   "outbounds": [
