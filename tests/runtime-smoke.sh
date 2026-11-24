@@ -141,12 +141,13 @@ JX_ID_AFTER="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
 test "$JX_ID" = "$JX_ID_AFTER"
 echo "[smoke] database + secret subscription path survive container recreation: OK"
 
-# Fresh-install path: the requested default admin/admin credential must work.
+# Fresh-install path with an explicit test-only weak password; production setup generates a strong password.
 # The password is hashed in SQLite and must survive container recreation on the same volume.
 docker volume create "$AUTO_VOLUME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
   -v "$AUTO_VOLUME:/var/lib/marzban" \
+  -e ADMIN_PASSWORD=admin -e ALLOW_INSECURE_ADMIN_PASSWORD=1 \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="$AUTO_BASE" \
   "$IMAGE" >/dev/null
 AUTO_HEALTHY=0
