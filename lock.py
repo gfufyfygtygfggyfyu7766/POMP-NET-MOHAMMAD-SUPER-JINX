@@ -224,7 +224,7 @@ XRAY_EXE = os.environ.get("XRAY_EXECUTABLE_PATH") or shutil.which("xray") or "/u
 def xray_test(cfg):
     """(True, msg) = accepted or no way to test; (False, msg) = Xray refused it"""
     if not (os.path.isfile(XRAY_EXE) and os.access(XRAY_EXE, os.X_OK)):
-        return True, "no xray binary to test with"
+        return False, f"Xray executable is missing or not executable: {XRAY_EXE}"
     t = "/run/jinx/xray_test.json"
     try:
         os.makedirs("/run/jinx", exist_ok=True)
@@ -238,7 +238,7 @@ def xray_test(cfg):
         out = (r.stdout + r.stderr).strip().splitlines()
         return r.returncode == 0, (out[-1] if out else f"exit {r.returncode}")[:300]
     except Exception as e:
-        return True, f"test skipped ({e})"
+        return False, f"Xray validation could not run: {e}"
     finally:
         try: os.remove(t)
         except OSError: pass
@@ -295,8 +295,9 @@ else:
         base = fixed
         print(f"[lock] fixed: Xray accepts the config now ({len(base['inbounds'])} inbounds)", flush=True)
     else:
-        # not caused by our extras (e.g. a broken image): keep the full config, the panel shows Xray's own error
-        print("[lock] WARNING: not caused by an optional extra -> full config kept, check the Xray error above", flush=True)
+        # Never publish subscription links for a configuration that the bundled Xray rejected.
+        # Fail startup so the deployment log exposes the real cause instead of serving dead configs.
+        raise SystemExit("[lock] FATAL: bundled Xray rejected the base configuration; refusing to publish unusable VPN links")
 tags = [i["tag"] for i in base["inbounds"]]
 tmp = DST + ".tmp"
 json.dump(base, open(tmp, "w"), indent=2, ensure_ascii=False)
