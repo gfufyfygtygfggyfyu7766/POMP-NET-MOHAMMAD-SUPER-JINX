@@ -10,7 +10,16 @@ API = "http://127.0.0.1:8000"
 LOCKED_TAG = json.load(open("/opt/locked_inbound.json"))["tag"]
 LOCKED_REMARK = "Mohammad Pomp Net"                    # every config name starts with this
 OLD_REMARKS = ("محمد پمپ نت", "جینکس | 𝗝𝗶𝗻𝗫", "جینکس | 𝙎𝙪𝙥𝙚𝙧 𝗝𝗶𝗻𝗫")               # names of the previous version -> renamed automatically
-DOMAIN = os.environ.get("PANEL_DOMAIN") or os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+def _public_domain(value):
+    value = (value or "").strip().lower().rstrip(".")
+    # Reject documentation/example placeholders; never publish configs pointing at them.
+    if not value or value == "example.com" or value.endswith(".example.com"):
+        return ""
+    if "://" in value or "/" in value or ":" in value or " " in value:
+        return ""
+    return value
+
+DOMAIN = _public_domain(os.environ.get("PANEL_DOMAIN")) or _public_domain(os.environ.get("RAILWAY_PUBLIC_DOMAIN"))
 CF_HOST = os.environ.get("CF_TUNNEL_HOSTNAME", "") if os.environ.get("CF_TUNNEL_TOKEN") else ""
 def _list(name, default=""):
     return [x.strip() for x in os.environ.get(name, default).replace(" ", ",").split(",") if x.strip()]
