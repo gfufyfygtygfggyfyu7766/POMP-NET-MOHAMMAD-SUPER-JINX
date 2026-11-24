@@ -10,6 +10,7 @@ sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
+RESET_PASSWORD_FILE = "/var/lib/marzban/.pompnet-admin-reset-password"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
 SYSTEM = "jinx-system"
 CRED = "/run/jinx/system.json"
@@ -82,12 +83,7 @@ with GetDB() as db:
                 except FileExistsError:
                     pass
                 print(f"[admin] ONE-TIME LOGIN -> username: {ADMIN} | password: {DEFAULT_PW}", flush=True)
-            elif not os.path.exists(FIRST_LOGIN_FILE):
-                fd = os.open(FIRST_LOGIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-                with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                    _f.write(DEFAULT_PW)
-                    _f.flush()
-                    os.fsync(_f.fileno())
+            # Explicit ADMIN_PASSWORD values are not copied into a plaintext recovery file.
         else:                                                                  # 'admin' is a reseller's name
             msg = "[admin] WARNING: only reseller admins exist and one is named 'admin'; rename it to recover"
     elif RESET:
@@ -96,21 +92,26 @@ with GetDB() as db:
             sys.exit(1)
         # A controlled recovery is possible even when the old password is unknown:
         # set RESET_ADMIN_PASSWORD=1. If ADMIN_PASSWORD is absent, create one strong
-        # password, persist it with mode 0600, and print it once to deploy logs.
+        # password in a dedicated private file, then print it only on first creation.
         generated = False
         if not DEFAULT_PW:
             try:
-                with open(FIRST_LOGIN_FILE, encoding="utf-8") as _f:
+                with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
                     DEFAULT_PW = _f.read().strip()
             except OSError:
                 DEFAULT_PW = secrets.token_urlsafe(32)
                 generated = True
-                os.makedirs(os.path.dirname(FIRST_LOGIN_FILE), exist_ok=True)
-                fd = os.open(FIRST_LOGIN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-                with os.fdopen(fd, "w", encoding="utf-8") as _f:
-                    _f.write(DEFAULT_PW)
-                    _f.flush()
-                    os.fsync(_f.fileno())
+                os.makedirs(os.path.dirname(RESET_PASSWORD_FILE), exist_ok=True)
+                try:
+                    fd = os.open(RESET_PASSWORD_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                    with os.fdopen(fd, "w", encoding="utf-8") as _f:
+                        _f.write(DEFAULT_PW)
+                        _f.flush()
+                        os.fsync(_f.fileno())
+                except FileExistsError:
+                    with open(RESET_PASSWORD_FILE, encoding="utf-8") as _f:
+                        DEFAULT_PW = _f.read().strip()
+                    generated = False
         if len(DEFAULT_PW) < 14:
             print("[admin] FATAL: ADMIN_PASSWORD must contain at least 14 characters", flush=True)
             sys.exit(1)
