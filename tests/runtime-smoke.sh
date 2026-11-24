@@ -80,12 +80,25 @@ echo "[smoke] readable high-contrast low-motion styles: OK"
 start_panel
 wait_panel
 
+# The five SideRail-compatible HTTP inbounds must exist in the generated Xray runtime config.
+docker exec "$NAME" python -c 'import json; c=json.load(open("/var/lib/marzban/xray_config.json")); a={x["tag"]:x for x in c["inbounds"]}; required={"VLESS WS","VMESS WS","TROJAN WS","VLESS HTTPUPGRADE","VLESS XHTTP"}; missing=required-set(a); assert not missing, "missing SideRail-compatible inbounds: "+", ".join(sorted(missing)); assert a["VLESS XHTTP"]["streamSettings"]["xhttpSettings"]["mode"]=="auto"; assert all(not x.get("sniffing",{}).get("enabled",False) for x in a.values()), "Xray sniffing must be disabled"; assert "VLESS XHTTP SU" not in a; print("[smoke] five SideRail-compatible inbounds + XHTTP auto + sniffing disabled: OK")'
+
+# The support page contains only the configured bank card and its copy action.
+DONATE_PAGE="$(curl --fail --silent --show-error "$BASE/donate/")"
+grep -q -- "حمایت پروژه" <<< "$DONATE_PAGE"
+grep -q -- "6280231311605819" <<< "$DONATE_PAGE"
+grep -q -- "کپی شماره کارت" <<< "$DONATE_PAGE"
+if grep -q -- "هر بخش از POMP NET" <<< "$DONATE_PAGE"; then echo "Unexpected extra support text" >&2; exit 1; fi
+echo "[smoke] project support page shows bank card only: OK"
+
 # Verify the real PasarGuard dashboard is served and receives the POMP NET skin.
 DASHBOARD_HTML="$(curl --fail --silent --show-error "$BASE/dashboard/")"
 grep -q -- 'href="/jinx.css"' <<< "$DASHBOARD_HTML"
 grep -q -- 'src="/jinx.js"' <<< "$DASHBOARD_HTML"
 JINX_SCRIPT="$(curl --fail --silent --show-error "$BASE/jinx.js")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$JINX_SCRIPT"
+grep -q -- "pompnet-panel-credit" <<< "$JINX_SCRIPT"
+grep -q -- "با همراهی SUPER JINX" <<< "$JINX_SCRIPT"
 grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$JINX_SCRIPT"
 JINX_STYLE="$(curl --fail --silent --show-error "$BASE/jinx.css")"
 grep -q -- "Vazirmatn" <<< "$JINX_STYLE"
@@ -131,6 +144,8 @@ printf '%s' "$SUB_BODY" | python -c 'import base64,sys; raw=sys.stdin.buffer.rea
 # Browser subscription page must render the custom Persian POMP NET template, not only raw config text.
 SUB_PAGE="$(curl --location --fail --silent --show-error -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124.0 Mobile Safari/537.36' -H 'Accept: text/html,application/xhtml+xml' "$BASE$SUB_PATH")"
 grep -q -- "POMP NET MOHAMMAD" <<< "$SUB_PAGE"
+grep -q -- "کدنویسی و توسعه توسط تیم POMP NET MOHAMMAD" <<< "$SUB_PAGE"
+grep -q -- "با همراهی SUPER JINX" <<< "$SUB_PAGE"
 grep -q -- "#8B35FF" <<< "$SUB_PAGE"
 if grep -qi -- "SideRail" <<< "$SUB_PAGE"; then
   echo "Unexpected third-party subscription branding" >&2
