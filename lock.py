@@ -92,7 +92,7 @@ if _tcp_port and _tcp_mode == "shadowsocks":
         extra.append({"tag": TCP_TAG, "listen": "0.0.0.0", "port": _tcp_port, "protocol": "shadowsocks",
                       "settings": {"clients": [], "network": "tcp"},
                       "sniffing": {"enabled": True, "destOverride": ["http", "tls", "quic"], "routeOnly": True}})
-        print(f"[lock] Shadowsocks TCP/UDP enabled on Railway TCP Proxy application port {_tcp_port}", flush=True)
+        print(f"[lock] Shadowsocks TCP-only enabled on Railway TCP Proxy application port {_tcp_port}", flush=True)
 elif _tcp_port and _tcp_mode == "reality" and os.environ.get("JINX_REALITY", "1") != "0":
     if _tcp_port in (8080, 8000, 8090, 2001, 2002, 2003, 2004, 2005, 2006, 2007) or not 1024 <= _tcp_port <= 65535:
         print(f"[lock] invalid TCP Proxy application port {_tcp_port}; Reality skipped", flush=True)
