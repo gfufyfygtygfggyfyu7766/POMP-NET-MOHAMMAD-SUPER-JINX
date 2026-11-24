@@ -99,7 +99,7 @@ jobs:
 
           # Wait for Xray to start, then verify actual WebSocket upgrades through Nginx
           # to all three generated protocol listeners (not just that the process exists).
-          docker exec pompnet-smoke python - <<'PY'
+          docker exec -i pompnet-smoke python - <<'PY'
           import json, os, socket, time
           cfg = json.load(open("/var/lib/marzban/xray_config.json", encoding="utf-8"))
           inbounds = {x.get("tag"): x for x in cfg.get("inbounds", [])}
@@ -114,13 +114,13 @@ jobs:
               assert (ib.get("streamSettings") or {}).get("wsSettings", {}).get("path") == base + expected, f"{tag} path mismatch"
           def handshake(path):
               s = socket.create_connection(("127.0.0.1", 8080), timeout=5)
-              req = (f"GET {path} HTTP/1.1\\r\\nHost: 127.0.0.1\\r\\nUpgrade: websocket\\r\\n"
-                     "Connection: Upgrade\\r\\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\\r\\n"
-                     "Sec-WebSocket-Version: 13\\r\\n\\r\\n").encode()
+              req = (f"GET {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nUpgrade: websocket\r\n"
+                     "Connection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+                     "Sec-WebSocket-Version: 13\r\n\r\n").encode()
               s.sendall(req)
               data = s.recv(256)
               s.close()
-              return data.split(b"\\r\\n", 1)[0]
+              return data.split(b"\r\n", 1)[0]
           deadline = time.time() + 120
           while time.time() < deadline:
               try:
