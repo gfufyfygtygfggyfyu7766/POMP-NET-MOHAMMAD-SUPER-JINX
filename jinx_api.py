@@ -730,6 +730,25 @@ def agency_lock(name):
         return _alocks.setdefault(name, threading.Lock())
 
 HOP = {"connection", "keep-alive", "transfer-encoding", "content-length", "content-encoding", "upgrade", "te", "trailer", "proxy-authorization", "proxy-authenticate"}
+BOT_FILE = "/var/lib/marzban/pompnet_bot.json"
+def bot_cfg_load():
+    try:
+        with open(BOT_FILE, encoding="utf-8") as f: d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except Exception: return {}
+def bot_cfg_save(d):
+    import tempfile
+    os.makedirs(os.path.dirname(BOT_FILE), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".pompnet-bot-", dir=os.path.dirname(BOT_FILE))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False)
+            f.flush(); os.fsync(f.fileno())
+        os.chmod(tmp, 0o600); os.replace(tmp, BOT_FILE)
+    finally:
+        try: os.unlink(tmp)
+        except OSError: pass
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -930,6 +949,42 @@ class H(BaseHTTPRequestHandler):
                 return self.static_page(DONCFG_FILES, "application/javascript; charset=utf-8", b"/* donate config missing */")
             if method == "GET" and p.endswith("/health"):
                 return self.send(200, {"ok": True})
+            if p.endswith("/bot-config"):
+                c = self.caller(True)
+                if not c: return
+                if method == "GET":
+                    d = bot_cfg_load()
+                    return self.send(200, {"ok": True, "enabled": bool(d.get("enabled")), "chat_ids": d.get("chat_ids", []), "token_set": bool(d.get("token"))})
+                if method == "POST":
+                    try: body = json.loads(self.body(8192).decode("utf-8") or "{}")
+                    except Exception: return self.send(400, "bad_request")
+                    if not isinstance(body, dict): return self.send(400, "bad_request")
+                    d = bot_cfg_load()
+                    tok = str(body.get("token", d.get("token", ""))).strip()
+                    ids = body.get("chat_ids", d.get("chat_ids", []))
+                    if not isinstance(ids, list) or len(ids) > 20: return self.send(400, "bad_chat_ids")
+                    ids = [str(x).strip() for x in ids if re.fullmatch(r"-?\\d{1,24}", str(x).strip())]
+                    if len(ids) != len([x for x in body.get("chat_ids", ids) if str(x).strip()]): return self.send(400, "bad_chat_ids")
+                    enabled = bool(body.get("enabled", d.get("enabled", False)))
+                    if enabled and (not tok or not ids): return self.send(400, "token_and_chat_ids_required")
+                    if tok and not re.fullmatch(r"\\d{5,15}:[A-Za-z0-9_-]{20,}", tok): return self.send(400, "bad_bot_token")
+                    bot_cfg_save({"enabled": enabled, "token": tok, "chat_ids": ids})
+                    print("[bot] Telegram settings updated by owner; enabled="+str(enabled), flush=True)
+                    return self.send(200, {"ok": True, "enabled": enabled, "token_set": bool(tok), "chat_ids": ids})
+                return self.send(405, "method_not_allowed")
+            if method == "POST" and p.endswith("/bot-test"):
+                c = self.caller(True)
+                if not c: return
+                d = bot_cfg_load()
+                if not d.get("token") or not d.get("chat_ids"): return self.send(400, "bot_not_configured")
+                try:
+                    payload = json.dumps({"chat_id": d["chat_ids"][0], "text": "✅ ربات POMP NET MOHAMMAD به پنل متصل شد.\nارتباط Telegram API برقرار است."}).encode()
+                    req = urllib.request.Request("https://api.telegram.org/bot"+d["token"]+"/sendMessage", data=payload, headers={"Content-Type":"application/json"})
+                    with urllib.request.urlopen(req, timeout=12) as r: result = json.loads(r.read())
+                    if not result.get("ok"): return self.send(502, result.get("description", "telegram_error"))
+                    return self.send(200, {"ok": True})
+                except Exception as e:
+                    return self.send(502, {"error": "telegram_unreachable", "detail": str(e)[:180]})
             if method == "GET" and p.endswith("/qr"):
                 return self.qr(urllib.parse.parse_qs(query).get("d", [""])[0])
             if method == "POST" and p.endswith("/account"):
