@@ -8,7 +8,7 @@ import json, os, time, urllib.error, urllib.request, urllib.parse
 
 API = "http://127.0.0.1:8000"
 LOCKED_TAG = json.load(open("/opt/locked_inbound.json"))["tag"]
-LOCKED_REMARK = "POMP NET MOHAMMAD"                    # every config name starts with this
+LOCKED_REMARK = "محمد پمپ نت"                    # every config name starts with this
 OLD_REMARKS = ("جینکس | 𝗝𝗶𝗻𝗫", "جینکس | 𝙎𝙪𝙥𝙚𝙧 𝗝𝗶𝗻𝗫")               # names of the previous version -> renamed automatically
 DOMAIN = os.environ.get("PANEL_DOMAIN") or os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
 CF_HOST = os.environ.get("CF_TUNNEL_HOSTNAME", "") if os.environ.get("CF_TUNNEL_TOKEN") else ""
@@ -44,15 +44,19 @@ OLD_PATHS = {LOCKED_TAG: "/panel-ws", "VLESS WS": "/vless", "VMESS WS": "/vmess"
              "VLESS HTTPUPGRADE": "/vhu", "VLESS XHTTP": "/vxh", "VLESS XHTTP SU": ""}
 # 🛰 Reality over a Railway TCP Proxy (only when TCP Proxy is on; see lock.py)
 REALITY_TAG = "VLESS REALITY"
+SHADOWSOCKS_TAG = "Shadowsocks TCP"
 TCP_DOMAIN = os.environ.get("RAILWAY_TCP_PROXY_DOMAIN", "").strip()
 try:
     TCP_PORT = int(os.environ.get("RAILWAY_TCP_PROXY_PORT") or 0)
 except ValueError:
     TCP_PORT = 0
 REALITY_SNI = (os.environ.get("JINX_REALITY_SNI") or "www.speedtest.net").strip()
-if TCP_DOMAIN and TCP_PORT and os.environ.get("JINX_REALITY", "1") != "0":
-    PATHS[REALITY_TAG] = ""
-PROTO = {REALITY_TAG: "Reality", LOCKED_TAG: "JinX Core", "VLESS WS": "VLESS", "VMESS WS": "VMess", "TROJAN WS": "Trojan", "VLESS HTTPUPGRADE": "HTTPUpgrade", "VLESS XHTTP": "XHTTP", "VLESS XHTTP SU": "XHTTP"}
+if TCP_DOMAIN and TCP_PORT:
+    if os.environ.get("JINX_TCP_PROTOCOL", "shadowsocks").strip().lower() == "shadowsocks":
+        PATHS[SHADOWSOCKS_TAG] = ""
+    elif os.environ.get("JINX_TCP_PROTOCOL", "shadowsocks").strip().lower() == "reality" and os.environ.get("JINX_REALITY", "1") != "0":
+        PATHS[REALITY_TAG] = ""
+PROTO = {SHADOWSOCKS_TAG: "Shadowsocks", REALITY_TAG: "Reality", LOCKED_TAG: "JinX Core", "VLESS WS": "VLESS", "VMESS WS": "VMess", "TROJAN WS": "Trojan", "VLESS HTTPUPGRADE": "HTTPUpgrade", "VLESS XHTTP": "XHTTP", "VLESS XHTTP SU": "XHTTP"}
 # route names (each config gets its own name; the apps still pick the fastest one with their ping test)
 R_RELAY, R_CDN_IP, R_CDN = "🚀 Turbo Iran", "🌩 Cloud Storm", "☁️ Cloud Shield"
 # Railway region of this service (works in all 4; Amsterdam = lowest ping from Iran)
@@ -121,6 +125,11 @@ def reality_hosts():
 
 def wanted(tag):
     """All routes for one inbound, best first (MCI / Irancell / TCI / Rightel each have a winner)."""
+    if tag == SHADOWSOCKS_TAG:
+        if SHADOWSOCKS_TAG not in PATHS: return []
+        return [{"remark": name("Shadowsocks", SHADOWSOCKS_TAG), "address": TCP_DOMAIN, "port": TCP_PORT,
+                 "sni": "", "host": "", "path": "", "security": "none", "alpn": "", "fingerprint": "chrome",
+                 "allowinsecure": False, "is_disabled": False, "mux_enable": False, "fragment_setting": None}]
     if tag == REALITY_TAG:
         return reality_hosts() if REALITY_TAG in PATHS else []
     path = PATHS.get(tag)
@@ -200,6 +209,8 @@ def is_default(h):
     return (not h) or "{SERVER_IP}" in str(h.get("address", ""))
 
 def ours(tag, lst):
+    if tag == SHADOWSOCKS_TAG:
+        return bool(lst) and all(str(h.get("remark") or "").startswith(LOCKED_REMARK + " ✦ ") for h in lst)
     """Still managed by us: every host has our name (or an old auto name) and our path."""
     p = {(PATHS.get(tag) or "").split("?")[0], OLD_PATHS.get(tag, "")} - {""}
     pre = tuple(r + " ✦ " for r in (LOCKED_REMARK,) + OLD_REMARKS)
