@@ -30,6 +30,7 @@ start_panel() {
     -v "$VOLUME:/var/lib/marzban" \
     -e ADMIN_USERNAME="$ADMIN" \
     -e ADMIN_PASSWORD="$PASSWORD" \
+    -e ALLOW_INSECURE_ADMIN_PASSWORD=1 \
     -e XRAY_SUBSCRIPTION_URL_PREFIX="$BASE" \
     -e SUB_PROFILE_TITLE="POMP NET MOHAMMAD" \
     "$IMAGE" >/dev/null
