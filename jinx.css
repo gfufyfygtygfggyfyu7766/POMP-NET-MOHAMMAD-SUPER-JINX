@@ -571,3 +571,24 @@ a, button[aria-label], [role="button"] { transition:border-color .2s ease,box-sh
 button:focus-visible,a:focus-visible,input:focus-visible { outline:2px solid #ffffff !important; outline-offset:2px; }
 ::-webkit-scrollbar-thumb { background:#777777 !important; }
 ::selection { background:rgba(255,255,255,.25) !important; }
+
+
+/* POMP NET BLACK EDITION — login + dashboard, consistent deep-black surfaces */
+:root, .chakra-ui-dark, [data-theme="dark"] {
+  --pomp-bg:#030305 !important; --pomp-panel:#08080c !important;
+  --pomp-panel-raised:#0d0d13 !important; --pomp-border:rgba(139,53,255,.24) !important;
+}
+html, body, #root, #__next { background:#030305 !important; color:#f5f3ff; }
+body { background:radial-gradient(ellipse at 12% 0%,rgba(92,35,160,.10),transparent 34rem),#030305 !important; }
+.chakra-ui-dark, [data-theme="dark"] { background-color:#030305 !important; }
+.chakra-ui-dark .chakra-card, .chakra-ui-dark .chakra-modal__content,
+.chakra-ui-dark .chakra-menu__menu-list, .chakra-ui-dark .chakra-popover__content,
+[data-theme="dark"] .chakra-card, [data-theme="dark"] .chakra-modal__content,
+[data-theme="dark"] .chakra-menu__menu-list, [data-theme="dark"] .chakra-popover__content {
+  background:#09090f !important; border-color:rgba(139,53,255,.22) !important;
+}
+input, textarea, select, .chakra-input, .chakra-select, .chakra-textarea {
+  background:#07070b !important; color:#f5f3ff !important; border-color:#292236 !important;
+}
+/* Login form containers are intentionally opaque black, not translucent glass. */
+form, [class*="login"], [class*="Login"] { color:#f5f3ff; }
