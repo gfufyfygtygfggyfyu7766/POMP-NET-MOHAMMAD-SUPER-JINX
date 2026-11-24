@@ -8,7 +8,7 @@ NAME="pompnet-jinx-smoke"
 RESET_NAME="pompnet-jinx-reset-admin"
 VOLUME="pompnet-jinx-smoke-data"
 BASE="http://127.0.0.1:18080"
-ADMIN="admin"
+ADMIN="ADMIN_tanel9990"
 PASSWORD="admin"
 USER="jinx_ci_smoke"
 
@@ -170,7 +170,7 @@ test "$AUTO_PASSWORD" != "admin"
 test "$(printf "%s" "$AUTO_PASSWORD" | wc -c)" -ge 32
 AUTO_TOKEN="$(curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  --data-urlencode "username=admin" \
+  --data-urlencode "username=ADMIN_tanel9990" \
   --data-urlencode "password=$AUTO_PASSWORD" \
   | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 test -n "$AUTO_TOKEN"
@@ -196,7 +196,7 @@ done
 test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin container did not recover after recreation" >&2; exit 1; }
 curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode "username=admin" \
+  --data-urlencode "username=ADMIN_tanel9990" \
   --data-urlencode "password=$AUTO_PASSWORD" \
   | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
 
