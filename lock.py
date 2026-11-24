@@ -90,7 +90,7 @@ if _tcp_port and _tcp_mode == "shadowsocks":
         print(f"[lock] invalid TCP Proxy application port {_tcp_port}; Shadowsocks skipped", flush=True)
     elif marzban_knows("shadowsocks"):
         extra.append({"tag": TCP_TAG, "listen": "0.0.0.0", "port": _tcp_port, "protocol": "shadowsocks",
-                      "settings": {"clients": [], "network": "tcp,udp"},
+                      "settings": {"clients": [], "network": "tcp"},
                       "sniffing": {"enabled": True, "destOverride": ["http", "tls", "quic"], "routeOnly": True}})
         print(f"[lock] Shadowsocks TCP/UDP enabled on Railway TCP Proxy application port {_tcp_port}", flush=True)
 elif _tcp_port and _tcp_mode == "reality" and os.environ.get("JINX_REALITY", "1") != "0":
@@ -105,7 +105,7 @@ elif _tcp_port and _tcp_mode == "reality" and os.environ.get("JINX_REALITY", "1"
             except Exception:
                 exe = os.environ.get("XRAY_EXECUTABLE_PATH") or shutil.which("xray") or "/usr/local/bin/xray"
                 out = subprocess.run([exe, "x25519"], capture_output=True, text=True, timeout=10).stdout
-                m = re.search(r"Private\\s*key:\\s*(\\S+)", out, re.I)
+                m = re.search(r"Private\s*key:\s*(\S+)", out, re.I)
                 if not m: raise RuntimeError("xray x25519 gave no key")
                 k = {"private": m.group(1), "sid": os.urandom(4).hex()}
                 tmpk = kf + ".tmp"; json.dump(k, open(tmpk, "w")); os.chmod(tmpk, 0o600); os.replace(tmpk, kf)
@@ -187,7 +187,7 @@ else:
     print("[lock] ad blocker off (no ads list in this image, or JINX_ADBLOCK=0)", flush=True)
 
 # order = order in the subscription: lightest / steadiest first (the locked inbound always stays first)
-_RANK = {locked["tag"]: 0, "VLESS REALITY": 1, "VLESS HTTPUPGRADE": 2, "VLESS XHTTP": 3, "VLESS XHTTP SU": 4, "VLESS WS": 5, "TROJAN WS": 6, "VMESS WS": 7}
+_RANK = {locked["tag"]: 0, "Shadowsocks TCP": 1, "VLESS REALITY": 2, "VLESS HTTPUPGRADE": 3, "VLESS XHTTP": 4, "VLESS XHTTP SU": 5, "VLESS WS": 6, "TROJAN WS": 7, "VMESS WS": 8}
 base["inbounds"] = sorted(_keep, key=lambda i: _RANK.get(i["tag"], 50))
 
 # 🧷 TCP Fast Open: kept only if this server's kernel really accepts it (a refused socket option = no connection at all)
