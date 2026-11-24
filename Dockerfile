@@ -19,6 +19,7 @@ COPY nginx.conf /opt/jinx/nginx.conf.tpl
 COPY xray_config.json locked_inbound.json lock.py enforce_hosts.py ensure_admin.py doctor.py jinx_api.py /opt/
 COPY jinx.css jinx.js donate.html donate-config.js /opt/jinx/
 COPY pompnet-dashboard.html /opt/jinx/pompnet-dashboard.html
+COPY pompnet-motion.css pompnet-motion.js /opt/jinx/
 COPY sub.html /opt/jinx/templates/subscription/index.html
 COPY sub.html /opt/jinx/sub.golden.html
 COPY donate.html /opt/jinx/donate.golden.html
