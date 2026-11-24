@@ -963,11 +963,11 @@ class H(BaseHTTPRequestHandler):
                     tok = str(body.get("token", d.get("token", ""))).strip()
                     ids = body.get("chat_ids", d.get("chat_ids", []))
                     if not isinstance(ids, list) or len(ids) > 20: return self.send(400, "bad_chat_ids")
-                    ids = [str(x).strip() for x in ids if re.fullmatch(r"-?\\d{1,24}", str(x).strip())]
+                    ids = [str(x).strip() for x in ids if re.fullmatch(r"-?\d{1,24}", str(x).strip())]
                     if len(ids) != len([x for x in body.get("chat_ids", ids) if str(x).strip()]): return self.send(400, "bad_chat_ids")
                     enabled = bool(body.get("enabled", d.get("enabled", False)))
                     if enabled and (not tok or not ids): return self.send(400, "token_and_chat_ids_required")
-                    if tok and not re.fullmatch(r"\\d{5,15}:[A-Za-z0-9_-]{20,}", tok): return self.send(400, "bad_bot_token")
+                    if tok and not re.fullmatch(r"\d{5,15}:[A-Za-z0-9_-]{20,}", tok): return self.send(400, "bad_bot_token")
                     bot_cfg_save({"enabled": enabled, "token": tok, "chat_ids": ids})
                     print("[bot] Telegram settings updated by owner; enabled="+str(enabled), flush=True)
                     return self.send(200, {"ok": True, "enabled": enabled, "token_set": bool(tok), "chat_ids": ids})
