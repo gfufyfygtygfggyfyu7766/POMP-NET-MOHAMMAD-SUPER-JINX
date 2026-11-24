@@ -89,6 +89,14 @@ grep -q -- "به پنل پمپ نت محمد خوش آمدید" <<< "$JINX_SCRIP
 JINX_STYLE="$(curl --fail --silent --show-error "$BASE/jinx.css")"
 grep -q -- "Vazirmatn" <<< "$JINX_STYLE"
 echo "[smoke] native PasarGuard dashboard + POMP NET skin: OK"
+# Telegram bot settings are served, but configuration stays owner-only.
+BOT_PAGE="$(curl --fail --silent --show-error "$BASE/bot/")"
+grep -q "ربات مدیریت POMP NET MOHAMMAD" <<< "$BOT_PAGE"
+BOT_UNAUTH="$(curl --silent --output /dev/null --write-out '%{http_code}' "$BASE/jinx-api/bot-config")"
+test "$BOT_UNAUTH" = "401"
+OWNER_TOKEN="$(login)"
+curl --fail --silent --show-error "$BASE/jinx-api/bot-config" -H "Authorization: Bearer $OWNER_TOKEN" \
+  | python -c 'import json,sys; d=json.load(sys.stdin); assert d["ok"] and "token_set" in d; print("[smoke] owner-only Telegram bot settings endpoint: OK")'
 
 # Verify the 24-scene animated layer is served from the built image (not only present in GitHub).
 MOTION_CSS="$(curl --fail --silent --show-error "$BASE/pompnet-motion.css")"
