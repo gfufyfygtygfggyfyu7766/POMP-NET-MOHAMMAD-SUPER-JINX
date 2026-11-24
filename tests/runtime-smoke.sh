@@ -201,6 +201,7 @@ docker run -d --name "$RESET_NAME" \
   -p 127.0.0.1:18082:8080 \
   -v "$VOLUME:/var/lib/marzban" \
   -e ADMIN_USERNAME="$ADMIN" \
+  -e ADMIN_PASSWORD="$PASSWORD" \
   -e RESET_ADMIN_PASSWORD=1 \
   -e XRAY_SUBSCRIPTION_URL_PREFIX="http://127.0.0.1:18082" \
   "$IMAGE" >/dev/null
