@@ -1,5 +1,5 @@
 # Super JinX admin manager (runs on every start)
-#  - first install: creates admin as admin; ADMIN_PASSWORD overrides the built-in first-deploy default
+#  - first install: creates admin as admin; ADMIN_PASSWORD overrides a generated one-time password
 #  - generated first-login credentials are saved privately on the persistent data volume and printed once to deploy logs
 #  - existing installations receive the configured default admin credentials once
 #  - a marker on the persistent data volume prevents password changes on later restarts
@@ -8,7 +8,7 @@ import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
 ADMIN = os.environ.get("ADMIN_USERNAME", "admin").strip() or "admin"
-DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "PnJ!7vQ#4mR@9xL2zK8$wT6c")
+DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 FIRST_LOGIN_FILE = "/var/lib/marzban/.pompnet-first-login"
 DEFAULT_ADMIN_APPLIED = "/var/lib/marzban/.pompnet-default-admin-applied"
 SYSTEM = "jinx-system"
