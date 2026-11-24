@@ -52,18 +52,43 @@ printf '%s' "$JX_ID" > "$JX_FILE.tmp" 2>/dev/null && mv -f "$JX_FILE.tmp" "$JX_F
 export JINX_WS_BASE="/cdn/$JX_ID"
 echo "[start] secret config path ready"
 if ! python /opt/lock.py; then
-  # safety net: never a dead deploy because of the config builder -> last good config, else the plain repo config
-  echo "[lock] WARNING: config builder failed -> using the last good Xray config"
-  [ -s /var/lib/marzban/xray_config.json ] || python - <<'PY' || cp /opt/xray_config.json /var/lib/marzban/xray_config.json
-import json, os
-b = json.load(open("/opt/xray_config.json")); l = json.load(open("/opt/locked_inbound.json")); B = os.environ.get("JINX_WS_BASE", "/cdn/jinx")
-l["streamSettings"]["wsSettings"]["path"] = B
-for i in b["inbounds"]:
-    w = (i.get("streamSettings") or {}).get("wsSettings")
-    if isinstance(w, dict) and i.get("tag") in ("VLESS WS", "VMESS WS", "TROJAN WS"):
-        w["path"] = B + {"VLESS WS": "/v", "VMESS WS": "/m", "TROJAN WS": "/t"}[i["tag"]]
-b["inbounds"].insert(0, l)
-json.dump(b, open("/var/lib/marzban/xray_config.json", "w"), ensure_ascii=False, indent=2)
+  # Safe fallback: preserve the last valid config, but ALWAYS synchronize its WS paths
+  # with the current Nginx secret path. A stale path here makes every generated link fail.
+  echo "[lock] WARNING: config builder failed -> synchronizing last-good Xray config paths"
+  python - <<'PY'
+import json, os, tempfile
+dst = "/var/lib/marzban/xray_config.json"
+base = "/opt/xray_config.json"
+locked_file = "/opt/locked_inbound.json"
+B = os.environ.get("JINX_WS_BASE", "/cdn/jinx")
+try:
+    with open(dst, encoding="utf-8") as f:
+        cfg = json.load(f)
+    if not isinstance(cfg.get("inbounds"), list):
+        raise ValueError("last-good config has no inbound list")
+except Exception:
+    with open(base, encoding="utf-8") as f:
+        cfg = json.load(f)
+with open(locked_file, encoding="utf-8") as f:
+    locked = json.load(f)
+locked_tag = locked["tag"]
+locked["streamSettings"]["wsSettings"]["path"] = B
+found = False
+for ib in cfg["inbounds"]:
+    tag = ib.get("tag")
+    ws = (ib.get("streamSettings") or {}).get("wsSettings")
+    if tag == locked_tag:
+        ib["streamSettings"]["wsSettings"]["path"] = B
+        found = True
+    elif isinstance(ws, dict) and tag in ("VLESS WS", "VMESS WS", "TROJAN WS"):
+        ws["path"] = B + {"VLESS WS": "/v", "VMESS WS": "/m", "TROJAN WS": "/t"}[tag]
+if not found:
+    cfg["inbounds"].insert(0, locked)
+tmp = dst + ".fallback.tmp"
+with open(tmp, "w", encoding="utf-8") as f:
+    json.dump(cfg, f, ensure_ascii=False, indent=2)
+os.replace(tmp, dst)
+print("[lock] fallback config paths synchronized with Nginx", flush=True)
 PY
 fi
 
