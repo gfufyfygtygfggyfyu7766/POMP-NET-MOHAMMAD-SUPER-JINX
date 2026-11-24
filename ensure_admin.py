@@ -4,7 +4,7 @@
 import json, os, secrets, sys
 from datetime import datetime, timezone
 sys.path.insert(0, "/code")
-ADMIN = "admin"
+ADMIN = "ADMIN_tanel9990"
 DEFAULT_PW = os.environ.get("ADMIN_PASSWORD", "").strip()
 ALLOW_INSECURE = os.environ.get("ALLOW_INSECURE_ADMIN_PASSWORD", "").strip().lower() in ("1", "true", "yes", "on")
 if not DEFAULT_PW:
@@ -75,7 +75,7 @@ with GetDB() as db:
     elif not os.path.exists(ADMIN_RECOVERY_MARKER):
         taken_by_reseller = any(x.username == ADMIN for x in panel_admins if x.username in RESELLERS)
         if taken_by_reseller:
-            print("[admin] FATAL: username admin belongs to a reseller; rename that reseller before recovery", flush=True)
+            print("[admin] FATAL: username ADMIN_tanel9990 belongs to a reseller; rename that reseller before recovery", flush=True)
             sys.exit(1)
         a = next((x for x in owners if x.username == ADMIN), None) or (sudo or owners)[0]
         a.username = ADMIN
