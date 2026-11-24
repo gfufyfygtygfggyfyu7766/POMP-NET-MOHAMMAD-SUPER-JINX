@@ -266,7 +266,18 @@ def req(method, path, data=None, token=None, form=False):
 def sync(hosts, tag):
     want = wanted(tag)
     cur = hosts.get(tag) or []
-    if not want or (len(cur) == len(want) and all(same(c, w) for c, w in zip(cur, want))):
+    # If this build no longer has an inbound (for example XHTTP was rejected by
+    # the installed Xray/Marzban version, or Railway TCP Proxy was removed),
+    # do not keep publishing stale, branded host entries that cannot connect.
+    # Only remove entries that still match our own brand AND known managed path;
+    # user-created/custom hosts are left untouched.
+    if not want:
+        if cur and ours(tag, cur):
+            hosts.pop(tag, None)
+            print(f"[guard] removed stale managed routes for unavailable inbound: {tag}", flush=True)
+            return True
+        return False
+    if len(cur) == len(want) and all(same(c, w) for c, w in zip(cur, want)):
         return False
     tmpl = cur[0] if cur else {}
     new = []
