@@ -128,6 +128,36 @@ fi
 echo "[smoke] custom subscription page + POMP NET theme: OK"
 echo "[smoke] subscription endpoint returned a non-empty body: OK"
 
+# Verify the real reseller sub-panel: isolated admin account, enforced limits, and its own subscription.
+RESELLER="jinx_ci_reseller"
+RESELLER_PASS="Reseller-Super-123!"
+curl --fail --silent --show-error -X POST "$BASE/jinx-api/resellers" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  --data "{\"username\":\"$RESELLER\",\"password\":\"$RESELLER_PASS\",\"max_users\":10,\"quota_gb\":2,\"expire\":$(($(date +%s)+2592000)),\"title\":\"POMP NET CI reseller\",\"domain\":\"\"}" \
+  | python -c 'import json,sys; assert json.load(sys.stdin)["ok"] is True'
+RESELLER_TOKEN="$(curl --fail --silent --show-error -X POST "$BASE/api/admin/token" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode "username=$RESELLER" --data-urlencode "password=$RESELLER_PASS" \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
+curl --fail --silent --show-error "$BASE/api/admin" -H "Authorization: Bearer $RESELLER_TOKEN" \
+  | python -c 'import json,sys; a=json.load(sys.stdin); assert a["username"]=="jinx_ci_reseller" and not a["is_sudo"]'
+echo "[smoke] reseller account creation + independent login: OK"
+
+# A reseller must not be able to read the owner's user.
+OWNER_USER_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+  "$BASE/api/user/$USER" -H "Authorization: Bearer $RESELLER_TOKEN")"
+test "$OWNER_USER_STATUS" = "404" || { echo "Reseller accessed another admin's user (HTTP $OWNER_USER_STATUS)" >&2; exit 1; }
+
+RESELLER_USER_JSON="$(curl --fail --silent --show-error -X POST "$BASE/api/user" \
+  -H "Authorization: Bearer $RESELLER_TOKEN" -H 'Content-Type: application/json' \
+  --data '{"username":"jinx_ci_reseller_user","proxies":{"vless":{}},"inbounds":{"vless":["VLESS WS"]},"expire":0,"data_limit":536870912,"data_limit_reset_strategy":"no_reset","status":"active"}')"
+echo "$RESELLER_USER_JSON" | python -c 'import json,sys; u=json.load(sys.stdin); assert u["username"]=="jinx_ci_reseller_user" and u.get("subscription_url"); print("[smoke] reseller creates own Xray user + real subscription URL: OK")'
+RESELLER_SUB="$(printf '%s' "$RESELLER_USER_JSON" | python -c 'import json,sys; print(json.load(sys.stdin)["subscription_url"])')"
+RESELLER_PATH="$(python -c 'import sys,urllib.parse; print(urllib.parse.urlsplit(sys.argv[1]).path)' "$RESELLER_SUB")"
+RESELLER_BODY="$(curl --location --fail --silent --show-error "$BASE$RESELLER_PATH")"
+test -n "$RESELLER_BODY" || { echo "Reseller subscription endpoint returned an empty body" >&2; exit 1; }
+echo "[smoke] reseller subscription endpoint: OK"
+
 # Confirm that Nginx can complete a real WebSocket upgrade to the Xray VLESS inbound.
 JX_ID="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
 python - "$BASE" "$JX_ID" <<'PY'
