@@ -386,6 +386,19 @@ body{background:radial-gradient(ellipse at 12% 0%,rgba(92,35,160,.10),transparen
 .amb .a2{background:radial-gradient(closest-side,rgba(22,140,255,.09),transparent 70%)!important}
 .amb .a3,.amb .a4{opacity:0!important}
 
+
+/* POMP NET readable subscription view: high contrast and low GPU load */
+:root{--a:#8b35ff;--a2:#c8a8ff;--gold:#8b35ff;--gold2:#6333d6;--c:#168cff}
+[data-theme=dark]{--bg:#050509;--dev:#0b0b14;--s1:#10101b;--s2:#151526;--s3:#1b1b2b;--line:rgba(139,53,255,.22);--line2:rgba(139,53,255,.38);--t1:#faf9ff;--t2:#d0cadd;--t3:#aaa3b8;--glow:.22}
+[data-theme=dark] .amb .a1,[data-theme=dark] .amb .a2,[data-theme=dark] .amb .a3,[data-theme=dark] .amb .a4{opacity:.35!important}
+[data-theme=dark] .neb,[data-theme=dark] .floor,[data-theme=dark] .dust{opacity:.12!important}
+.card,.panel,.box,.portal,.pass{border-color:rgba(139,53,255,.32)!important}
+body,.device,.card,.panel,.box,.portal{color:#f7f5ff}
+small,.muted,.hint,.desc,.sub{color:#c3bdd1}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #168cff!important;outline-offset:3px}
+@media(max-width:600px){.amb .neb,.amb .floor,.amb .gr,.amb .dust{display:none!important}.amb .a1,.amb .a2,.amb .a3,.amb .a4{animation:none!important;filter:none!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body>
