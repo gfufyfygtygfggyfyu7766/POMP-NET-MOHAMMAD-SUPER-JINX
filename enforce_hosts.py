@@ -209,9 +209,9 @@ def is_default(h):
     return (not h) or "{SERVER_IP}" in str(h.get("address", ""))
 
 def ours(tag, lst):
+    """Still managed by us: every host has our name (or an old auto name) and our path."""
     if tag == SHADOWSOCKS_TAG:
         return bool(lst) and all(str(h.get("remark") or "").startswith(LOCKED_REMARK + " ✦ ") for h in lst)
-    """Still managed by us: every host has our name (or an old auto name) and our path."""
     p = {(PATHS.get(tag) or "").split("?")[0], OLD_PATHS.get(tag, "")} - {""}
     pre = tuple(r + " ✦ " for r in (LOCKED_REMARK,) + OLD_REMARKS)
     return bool(lst) and all((h.get("remark") in OLD_AUTO | {LOCKED_REMARK} | set(OLD_REMARKS) or str(h.get("remark") or "").startswith(pre)) and str(h.get("path") or "").split("?")[0] in p for h in lst)
