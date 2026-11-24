@@ -141,9 +141,8 @@ JX_ID_AFTER="$(docker exec "$NAME" cat /var/lib/marzban/jinx_path)"
 test "$JX_ID" = "$JX_ID_AFTER"
 echo "[smoke] database + secret subscription path survive container recreation: OK"
 
-# Fresh-install path: no ADMIN_PASSWORD is supplied. The app must generate
-# a one-time secret, expose it only in this container's deploy log, and keep
-# the same credential after container recreation on the same persistent volume.
+# Fresh-install path: the requested default admin/admin credential must work.
+# The password is hashed in SQLite and must survive container recreation on the same volume.
 docker volume create "$AUTO_VOLUME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
   -p 127.0.0.1:18081:8080 \
@@ -155,24 +154,21 @@ for _ in $(seq 1 120); do
   AUTO_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$AUTO_BASE/health" 2>/dev/null || true)"
   if [[ "$AUTO_STATUS" == "200" ]]; then AUTO_HEALTHY=1; break; fi
   if ! docker inspect -f '{{.State.Running}}' "$AUTO_NAME" 2>/dev/null | grep -q true; then
-    echo "Auto-admin fresh install container exited before becoming healthy" >&2
+    echo "Default-admin fresh install container exited before becoming healthy" >&2
+    docker logs "$AUTO_NAME" || true
     exit 1
   fi
   sleep 2
 done
-test "$AUTO_HEALTHY" = "1" || { echo "Auto-admin fresh install did not become healthy" >&2; exit 1; }
+test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin fresh install did not become healthy" >&2; exit 1; }
 
-AUTO_CREDENTIAL_LINE="$(docker logs "$AUTO_NAME" 2>&1 | grep -m1 'ONE-TIME LOGIN' || true)"
-AUTO_PASSWORD="$(printf '%s' "$AUTO_CREDENTIAL_LINE" | sed -n 's/.*password: //p' | tr -d '\r')"
-test -n "$AUTO_PASSWORD" || { echo "Generated one-time admin password was not emitted to deploy logs" >&2; exit 1; }
-test "${#AUTO_PASSWORD}" -ge 32 || { echo "Generated admin password is unexpectedly short" >&2; exit 1; }
 AUTO_TOKEN="$(curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "username=admin" \
-  --data-urlencode "password=$AUTO_PASSWORD" \
+  --data-urlencode "password=admin" \
   | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 test -n "$AUTO_TOKEN"
-echo "[smoke] automatic first-deploy admin generation + login: OK"
+echo "[smoke] fresh-install admin/admin login: OK"
 
 docker rm -f "$AUTO_NAME" >/dev/null
 docker run -d --name "$AUTO_NAME" \
@@ -185,24 +181,20 @@ for _ in $(seq 1 120); do
   AUTO_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$AUTO_BASE/health" 2>/dev/null || true)"
   if [[ "$AUTO_STATUS" == "200" ]]; then AUTO_HEALTHY=1; break; fi
   if ! docker inspect -f '{{.State.Running}}' "$AUTO_NAME" 2>/dev/null | grep -q true; then
-    echo "Auto-admin container exited after recreation" >&2
+    echo "Default-admin container exited after recreation" >&2
+    docker logs "$AUTO_NAME" || true
     exit 1
   fi
   sleep 2
 done
-test "$AUTO_HEALTHY" = "1" || { echo "Auto-admin container did not recover after recreation" >&2; exit 1; }
-if docker logs "$AUTO_NAME" 2>&1 | grep -q 'ONE-TIME LOGIN'; then
-  echo "Auto-admin password was unexpectedly regenerated on restart" >&2
-  exit 1
-fi
+test "$AUTO_HEALTHY" = "1" || { docker logs "$AUTO_NAME" || true; echo "Default-admin container did not recover after recreation" >&2; exit 1; }
 curl --fail --silent --show-error -X POST "$AUTO_BASE/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "username=admin" \
-  --data-urlencode "password=$AUTO_PASSWORD" \
-  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] generated admin credential persists across container recreation: OK")'
+  --data-urlencode "password=admin" \
+  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] admin/admin credential persists across container recreation: OK")'
 
-# Existing admin recovery path: explicit reset flag rotates the existing owner
-# to a fresh strong password without requiring the old password or a weak default.
+# Existing admin recovery path: the one-time migration marker upgrades the existing owner to admin/admin.
 # Stop the previous container first; never mount the same SQLite volume twice.
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d --name "$RESET_NAME" \
@@ -222,11 +214,8 @@ for _ in $(seq 1 120); do
   fi
   sleep 2
 done
-RESET_LINE="$(docker logs "$RESET_NAME" 2>&1 | grep -m1 'ONE-TIME LOGIN' || true)"
-RESET_PASSWORD="$(printf '%s' "$RESET_LINE" | sed -n 's/.*password: //p' | tr -d '\r')"
-test -n "$RESET_PASSWORD" || { echo "Admin recovery did not emit a one-time password" >&2; exit 1; }
 curl --fail --silent --show-error -X POST "http://127.0.0.1:18082/api/admin/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "username=$ADMIN" \
-  --data-urlencode "password=$RESET_PASSWORD" \
-  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] explicit existing-admin password recovery: OK")'
+  --data-urlencode "password=$PASSWORD" \
+  | python -c 'import json,sys; assert json.load(sys.stdin).get("access_token"); print("[smoke] one-time existing-admin recovery: OK")'
