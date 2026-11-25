@@ -154,9 +154,12 @@ def map_db():
     return db
 
 def lookup_sub_id(legacy_token):
-    with map_db() as db:
+    db = map_db()
+    try:
         row = db.execute('SELECT xui_sub_id FROM legacy_sub_map WHERE legacy_token=?', (legacy_token,)).fetchone()
-    return row[0] if row else None
+        return row[0] if row else None
+    finally:
+        db.close()
 
 def subscription_response(handler, legacy_token, suffix=''):
     sub_id = lookup_sub_id(legacy_token)
@@ -165,7 +168,9 @@ def subscription_response(handler, legacy_token, suffix=''):
         target = XUI_SUBSCRIPTION_BASE_URL + '/' + urllib.parse.quote(sub_id, safe='') + suffix
         if parsed.query: target += '?' + parsed.query
         try:
-            headers = {'User-Agent': handler.headers.get('User-Agent', 'POMP-NET')}
+            headers = {'User-Agent': handler.headers.get('User-Agent', 'POMP-NET'),
+                       'X-Forwarded-Proto': 'https',
+                       'X-Forwarded-Host': handler.headers.get('Host', '')}
             if handler.headers.get('Accept'): headers['Accept'] = handler.headers.get('Accept')
             with urllib.request.urlopen(urllib.request.Request(target, headers=headers), timeout=25) as res:
                 body = res.read(); handler.send_response(res.status)
@@ -179,7 +184,13 @@ def subscription_response(handler, legacy_token, suffix=''):
     legacy_path = '/sub/' + urllib.parse.quote(legacy_token, safe='') + suffix
     if parsed.query: legacy_path += '?' + parsed.query
     try:
-        req = urllib.request.Request('http://127.0.0.1:8000' + legacy_path, headers={'User-Agent': handler.headers.get('User-Agent', 'POMP-NET')})
+        req = urllib.request.Request('http://127.0.0.1:8000' + legacy_path, headers={
+            'User-Agent': handler.headers.get('User-Agent', 'POMP-NET'),
+            'Host': handler.headers.get('Host', 'localhost'),
+            'X-Forwarded-Proto': 'https',
+            'X-Forwarded-For': handler.headers.get('X-Forwarded-For', ''),
+            'X-Real-IP': handler.headers.get('X-Real-IP', '')
+        })
         with urllib.request.urlopen(req, timeout=25) as res:
             body = res.read(); handler.send_response(res.status)
             for name in ('Content-Type','Content-Disposition','Subscription-Userinfo','Profile-Update-Interval','Profile-Title','Cache-Control','ETag','Last-Modified'):
