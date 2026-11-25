@@ -217,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     if os.getenv("POMPNET_3XUI_BRIDGE","0") == "1":
-        if not BASE or not SECRET or (not API_TOKEN and (not USER or not PASSWORD)):
+        if not BASE or not SECRET or (not USER or not PASSWORD):
             raise SystemExit("[3xui-bridge] FATAL: set XUI_BASE_URL, POMPNET_ADAPTER_SECRET and XUI_API_TOKEN or XUI_USERNAME/XUI_PASSWORD")
         print("[3xui-bridge] staging compatibility API listening on 127.0.0.1:%d" % PORT, flush=True)
         ThreadingHTTPServer(("127.0.0.1",PORT),Handler).serve_forever()
