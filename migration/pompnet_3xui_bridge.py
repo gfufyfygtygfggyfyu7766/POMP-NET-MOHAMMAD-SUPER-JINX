@@ -4,7 +4,7 @@ Staging-only HTTP adapter for the existing dashboard's core endpoints.
 No legacy database is modified. Public /sub tokens are intentionally NOT
 rewritten until a verified legacy-token -> 3X-UI subId migration exists.
 """
-import base64, hashlib, hmac, http.cookiejar, json, os, re, threading, time
+import base64, hashlib, hmac, http.cookiejar, json, os, re, sqlite3, threading, time
 import urllib.error, urllib.parse, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -14,6 +14,8 @@ PASSWORD = os.getenv("XUI_PASSWORD", "")
 API_TOKEN = os.getenv("XUI_API_TOKEN", "")
 SECRET = os.getenv("POMPNET_ADAPTER_SECRET", "")
 PORT = int(os.getenv("POMPNET_3XUI_BRIDGE_PORT", "8091"))
+SUB_MAP_DB = os.getenv("POMPNET_SUB_MAP_DB", "/var/lib/marzban/pompnet-sub-map.sqlite3")
+XUI_SUBSCRIPTION_BASE_URL = os.getenv("XUI_SUBSCRIPTION_BASE_URL", "").rstrip("/")
 INBOUND_TAGS = {
     "vless": os.getenv("XUI_VLESS_INBOUND_TAG", "VLESS WS"),
     "vmess": os.getenv("XUI_VMESS_INBOUND_TAG", "VMESS WS"),
@@ -144,6 +146,51 @@ def json_body(handler, limit=65536):
     if not isinstance(data, dict): raise BridgeError("invalid_request_body")
     return data
 
+def map_db():
+    os.makedirs(os.path.dirname(SUB_MAP_DB) or '.', exist_ok=True)
+    db = sqlite3.connect(SUB_MAP_DB, timeout=15)
+    db.execute('CREATE TABLE IF NOT EXISTS legacy_sub_map (legacy_token TEXT PRIMARY KEY, xui_sub_id TEXT NOT NULL UNIQUE, username TEXT NOT NULL, migrated_at INTEGER NOT NULL)')
+    db.commit()
+    return db
+
+def lookup_sub_id(legacy_token):
+    with map_db() as db:
+        row = db.execute('SELECT xui_sub_id FROM legacy_sub_map WHERE legacy_token=?', (legacy_token,)).fetchone()
+    return row[0] if row else None
+
+def subscription_response(handler, legacy_token, suffix=''):
+    sub_id = lookup_sub_id(legacy_token)
+    parsed = urllib.parse.urlsplit(handler.path)
+    if sub_id and XUI_SUBSCRIPTION_BASE_URL:
+        target = XUI_SUBSCRIPTION_BASE_URL + '/' + urllib.parse.quote(sub_id, safe='') + suffix
+        if parsed.query: target += '?' + parsed.query
+        try:
+            headers = {'User-Agent': handler.headers.get('User-Agent', 'POMP-NET')}
+            if handler.headers.get('Accept'): headers['Accept'] = handler.headers.get('Accept')
+            with urllib.request.urlopen(urllib.request.Request(target, headers=headers), timeout=25) as res:
+                body = res.read(); handler.send_response(res.status)
+                for name in ('Content-Type','Content-Disposition','Subscription-Userinfo','Profile-Update-Interval','Profile-Title','Cache-Control','ETag','Last-Modified'):
+                    value = res.headers.get(name)
+                    if value: handler.send_header(name, value)
+                handler.send_header('Content-Length', str(len(body))); handler.end_headers(); handler.wfile.write(body); return
+        except Exception as exc:
+            print('[3xui-bridge] 3X-UI subscription failed; using legacy fallback: ' + str(exc)[:160], flush=True)
+    # Preserve unmigrated and temporarily unreachable subscriptions via the original Marzban service.
+    legacy_path = '/sub/' + urllib.parse.quote(legacy_token, safe='') + suffix
+    if parsed.query: legacy_path += '?' + parsed.query
+    try:
+        req = urllib.request.Request('http://127.0.0.1:8000' + legacy_path, headers={'User-Agent': handler.headers.get('User-Agent', 'POMP-NET')})
+        with urllib.request.urlopen(req, timeout=25) as res:
+            body = res.read(); handler.send_response(res.status)
+            for name in ('Content-Type','Content-Disposition','Subscription-Userinfo','Profile-Update-Interval','Profile-Title','Cache-Control','ETag','Last-Modified'):
+                value = res.headers.get(name)
+                if value: handler.send_header(name, value)
+            handler.send_header('Content-Length', str(len(body))); handler.end_headers(); handler.wfile.write(body)
+    except urllib.error.HTTPError as exc:
+        body = exc.read(); handler.send_response(exc.code); handler.send_header('Content-Type', exc.headers.get('Content-Type','text/plain; charset=utf-8')); handler.send_header('Content-Length', str(len(body))); handler.end_headers(); handler.wfile.write(body)
+    except Exception as exc:
+        handler.sendj(502, {'detail':'subscription service unavailable','reason':str(exc)[:160]})
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "POMP-NET-3XUI-Bridge/1.0"
     def sendj(self, status, data):
@@ -195,6 +242,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.path == "/health": return self.sendj(200,{"ok":True,"engine":"3x-ui-v3.11.0"})
+            sub_match = re.fullmatch(r"/sub/([A-Za-z0-9_-]{8,128})(/info)?", urllib.parse.urlsplit(self.path).path)
+            if sub_match: return subscription_response(self, sub_match.group(1), sub_match.group(2) or "")
             token_check(self.headers.get("Authorization",""))
             if self.path == "/api/users":
                 imap=inbound_index()
@@ -223,6 +272,7 @@ if __name__ == "__main__":
     if os.getenv("POMPNET_3XUI_BRIDGE","0") == "1":
         if not BASE or not SECRET or (not USER or not PASSWORD):
             raise SystemExit("[3xui-bridge] FATAL: set XUI_BASE_URL, POMPNET_ADAPTER_SECRET and XUI_API_TOKEN or XUI_USERNAME/XUI_PASSWORD")
+        map_db().close()
         print("[3xui-bridge] staging compatibility API listening on 127.0.0.1:%d" % PORT, flush=True)
         ThreadingHTTPServer(("127.0.0.1",PORT),Handler).serve_forever()
     else:
