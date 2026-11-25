@@ -20,6 +20,19 @@ class BridgeTests(unittest.TestCase):
                 self.assertEqual(bridge.lookup_sub_id('oldtoken123'), 'newsub123')
                 self.assertIsNone(bridge.lookup_sub_id('unknown-token'))
 
+
+    def test_inbound_index_uses_branded_remark_and_legacy_alias(self):
+        rows=[{"id":7,"remark":"POMP NET MOHAMMAD - VLESS WS","protocol":"vless","port":2053,"enable":True}]
+        with patch.object(bridge, "request", return_value=rows):
+            index=bridge.inbound_index()
+        self.assertEqual(index["POMP NET MOHAMMAD - VLESS WS"]["id"],7)
+        self.assertEqual(index["VLESS WS"]["id"],7)
+
+    def test_api_token_does_not_bypass_owner_login(self):
+        with patch.object(bridge, "API_TOKEN", "upstream-token"), patch.object(bridge, "USER", "owner"), patch.object(bridge, "PASSWORD", "correct"):
+            with self.assertRaises(bridge.BridgeError):
+                bridge.login_xui("attacker", "wrong")
+
     def test_normalize_traffic_and_expiry(self):
         client={"email":"alice","enable":True,"totalGB":1000,"expiryTime":1700000000000,
                 "inboundIds":[4],"traffic":{"up":10,"down":20}}
