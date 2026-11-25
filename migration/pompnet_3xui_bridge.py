@@ -265,6 +265,28 @@ class Handler(BaseHTTPRequestHandler):
                 imap=inbound_index()
                 rows=obj(request("GET","/panel/api/clients/list")) or []
                 return self.sendj(200,{"engine":"3X-UI v3.11.0","inbounds":len(imap),"total_users":len(rows),"active_users":sum(1 for x in rows if x.get("enable")),"online_users":None,"traffic_up":sum(int((x.get("traffic") or {}).get("up",0) or 0) for x in rows),"traffic_down":sum(int((x.get("traffic") or {}).get("down",0) or 0) for x in rows)})
+            if self.path == "/api/inbounds":
+                rows=obj(request("GET","/panel/api/inbounds/list"))
+                if not isinstance(rows,list): raise BridgeError("3X-UI inbound list is not an array")
+                safe=[]
+                for x in rows:
+                    if not isinstance(x,dict): continue
+                    proto=str(x.get("protocol","")).lower()
+                    safe.append({"id":x.get("id"),"remark":x.get("remark") or x.get("tag") or ("Inbound "+str(x.get("id"))),"tag":x.get("tag",""),"protocol":proto,"port":x.get("port"),"enable":bool(x.get("enable",True))})
+                return self.sendj(200,safe)
+            if self.path == "/api/diagnostics":
+                checks={"XUI_BASE_URL":bool(BASE),"POMPNET_ADAPTER_SECRET":bool(SECRET),"XUI_AUTH":bool(API_TOKEN or (USER and PASSWORD)),"XUI_SUBSCRIPTION_BASE_URL":bool(XUI_SUBSCRIPTION_BASE_URL),"POMPNET_SUB_MAP_DB":bool(SUB_MAP_DB)}
+                imap=inbound_index()
+                rows=obj(request("GET","/panel/api/clients/list")) or []
+                protocols={}
+                for x in imap.values():
+                    p=str(x.get("protocol","")).lower()
+                    protocols[p]=protocols.get(p,0)+1
+                configured_tags={p:{"tag":tag,"found":tag in imap} for p,tag in INBOUND_TAGS.items()}
+                db=map_db()
+                try: mapped=db.execute("SELECT COUNT(*) FROM legacy_sub_map").fetchone()[0]
+                finally: db.close()
+                return self.sendj(200,{"ok":True,"engine":"3X-UI v3.11.0","api_reachable":True,"client_count":len(rows),"inbound_count":len(imap),"protocol_counts":protocols,"configured_inbound_tags":configured_tags,"subscription_mappings":mapped,"checks":checks})
             raise BridgeError("not_found")
         except BridgeError as e:
             msg=str(e); self.sendj(401 if "token" in msg or "login" in msg else 502,{"detail":msg})
