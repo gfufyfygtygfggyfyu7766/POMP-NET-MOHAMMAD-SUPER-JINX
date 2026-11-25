@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          docker run -d --name pompnet-smoke -p 18080:8080 pompnet-mohammad:ci
+          docker run -d --name pompnet-smoke -e ADMIN_PASSWORD=CI-only-test-password -e POMPNET_3XUI_BRIDGE=0 -p 18080:8080 pompnet-mohammad:ci
           cleanup() { docker logs pompnet-smoke || true; docker rm -f pompnet-smoke >/dev/null 2>&1 || true; }
           trap cleanup EXIT
 
