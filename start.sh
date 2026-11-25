@@ -7,7 +7,7 @@ export ADMIN_USERNAME="${ADMIN_USERNAME:-ADMIN_tanel9990}"
 export ALLOW_INSECURE_ADMIN_PASSWORD="${ALLOW_INSECURE_ADMIN_PASSWORD:-0}"
 export RESET_ADMIN_PASSWORD="${RESET_ADMIN_PASSWORD:-0}"
 
-echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
+echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="\n\n# Optional staging bridge: existing dashboard API endpoints are routed to real 3X-UI.\nif [ "${POMPNET_3XUI_BRIDGE:-0}" = "1" ]; then\n  ( while true; do python /opt/pompnet_3xui_bridge.py; echo "[3xui-bridge] restarting in 3s"; sleep 3; done ) &\nfi
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
