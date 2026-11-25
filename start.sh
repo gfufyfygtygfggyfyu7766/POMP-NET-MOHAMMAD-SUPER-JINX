@@ -7,7 +7,10 @@ export ADMIN_USERNAME="${ADMIN_USERNAME:-ADMIN_tanel9990}"
 export ALLOW_INSECURE_ADMIN_PASSWORD="${ALLOW_INSECURE_ADMIN_PASSWORD:-0}"
 export RESET_ADMIN_PASSWORD="${RESET_ADMIN_PASSWORD:-0}"
 
-echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="\n\n# Optional staging bridge: existing dashboard API endpoints are routed to real 3X-UI.\nif [ "${POMPNET_3XUI_BRIDGE:-1}" != "1" ]; then
+echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
+
+# Optional staging bridge: existing dashboard API endpoints are routed to real 3X-UI.
+if [ "${POMPNET_3XUI_BRIDGE:-1}" != "1" ]; then
   echo "[3xui-bridge] FATAL: this staging branch routes dashboard API to 3X-UI; set POMPNET_3XUI_BRIDGE=1."
   exit 1
 fi
