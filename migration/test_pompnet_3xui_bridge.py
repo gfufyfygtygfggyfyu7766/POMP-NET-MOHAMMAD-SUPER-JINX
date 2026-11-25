@@ -1,0 +1,21 @@
+import base64, hashlib, hmac, json, os, unittest
+from unittest.mock import patch
+import pompnet_3xui_bridge as bridge
+
+class BridgeTests(unittest.TestCase):
+    def test_adapter_token_roundtrip_and_tamper_rejected(self):
+        with patch.object(bridge, "SECRET", "test-secret"):
+            token=bridge.token_make("owner")
+            self.assertEqual(bridge.token_check("Bearer "+token),"owner")
+            with self.assertRaises(bridge.BridgeError):
+                bridge.token_check("Bearer "+token+"x")
+    def test_normalize_traffic_and_expiry(self):
+        client={"email":"alice","enable":True,"totalGB":1000,"expiryTime":1700000000000,
+                "inboundIds":[4],"traffic":{"up":10,"down":20}}
+        inbound={"vless":{"id":4,"protocol":"vless","tag":"VLESS WS"}}
+        out=bridge.normalize(client,inbound)
+        self.assertEqual(out["used_traffic"],30)
+        self.assertEqual(out["inbounds"],{"vless":["VLESS WS"]})
+        self.assertEqual(out["data_limit"],1000)
+        self.assertEqual(out["expire"],1700000000)
+if __name__ == "__main__": unittest.main()
