@@ -107,7 +107,13 @@ def obj(response):
 def inbound_index():
     rows = obj(request("GET", "/panel/api/inbounds/list"))
     if not isinstance(rows, list): raise BridgeError("3X-UI inbound list is not an array")
-    return {str(x.get("tag") or x.get("remark") or ("inbound-"+str(x.get("id")))): x for x in rows if isinstance(x, dict)}
+    index = {str(x.get("tag") or x.get("remark") or ("inbound-"+str(x.get("id")))): x for x in rows if isinstance(x, dict)}
+    # Backward-compatible aliases for the existing dashboard protocol selectors.
+    for proto, alias in (("vless","VLESS WS"),("vmess","VMESS WS"),("trojan","TROJAN WS")):
+        matches = [x for x in rows if isinstance(x,dict) and str(x.get("protocol","")).lower()==proto and x.get("enable",True)]
+        if alias not in index and len(matches)==1:
+            index[alias] = matches[0]
+    return index
 
 def normalize(client, inbound_map):
     traffic = client.get("traffic") or {}
@@ -120,7 +126,7 @@ def normalize(client, inbound_map):
             if int(inbound.get("id", -1)) == int(iid):
                 proto = str(inbound.get("protocol", "")).lower()
                 if proto in ("vless","vmess","trojan"):
-                    proto_map.setdefault(proto, []).append(str(inbound.get("tag","")))
+                    proto_map.setdefault(proto, []).append(str(inbound.get("tag") or inbound.get("remark") or ""))
     proxies = {}
     inbounds = {}
     for proto, tags in proto_map.items():
