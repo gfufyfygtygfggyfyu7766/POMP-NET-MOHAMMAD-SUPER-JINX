@@ -1,6 +1,8 @@
 import base64, hashlib, hmac, json, os, unittest
 from unittest.mock import patch
 import pompnet_3xui_bridge as bridge
+import tempfile
+from pathlib import Path
 
 class BridgeTests(unittest.TestCase):
     def test_adapter_token_roundtrip_and_tamper_rejected(self):
@@ -9,6 +11,15 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(bridge.token_check("Bearer "+token),"owner")
             with self.assertRaises(bridge.BridgeError):
                 bridge.token_check("Bearer "+token+"x")
+    def test_legacy_subscription_mapping_lookup(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(bridge, 'SUB_MAP_DB', str(Path(tmp) / 'map.sqlite3')):
+                db=bridge.map_db()
+                db.execute('INSERT INTO legacy_sub_map VALUES(?,?,?,?)', ('oldtoken123','newsub123','alice',1))
+                db.commit(); db.close()
+                self.assertEqual(bridge.lookup_sub_id('oldtoken123'), 'newsub123')
+                self.assertIsNone(bridge.lookup_sub_id('unknown-token'))
+
     def test_normalize_traffic_and_expiry(self):
         client={"email":"alice","enable":True,"totalGB":1000,"expiryTime":1700000000000,
                 "inboundIds":[4],"traffic":{"up":10,"down":20}}
