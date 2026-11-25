@@ -9,16 +9,17 @@ export RESET_ADMIN_PASSWORD="${RESET_ADMIN_PASSWORD:-0}"
 
 echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 
-# Optional staging bridge: existing dashboard API endpoints are routed to real 3X-UI.
-if [ "${POMPNET_3XUI_BRIDGE:-1}" != "1" ]; then
-  echo "[3xui-bridge] FATAL: this staging branch routes dashboard API to 3X-UI; set POMPNET_3XUI_BRIDGE=1."
-  exit 1
+# Staging bridge is opt-in. Without its secrets, preserve the original Marzban
+# API/subscription routes; never leave Nginx pointing at a missing bridge.
+if [ "${POMPNET_3XUI_BRIDGE:-0}" = "1" ]; then
+  if [ -z "${XUI_BASE_URL:-}" ] || [ -z "${XUI_USERNAME:-}" ] || [ -z "${XUI_PASSWORD:-}" ] || [ -z "${POMPNET_ADAPTER_SECRET:-}" ]; then
+    echo "[3xui-bridge] FATAL: set XUI_BASE_URL, XUI_USERNAME, XUI_PASSWORD and POMPNET_ADAPTER_SECRET as service secrets."
+    exit 1
+  fi
+  ( while true; do python /opt/pompnet_3xui_bridge.py; echo "[3xui-bridge] restarting in 3s"; sleep 3; done ) &
+else
+  echo "[3xui-bridge] disabled; existing Marzban API and /sub routes remain active"
 fi
-if [ -z "${XUI_BASE_URL:-}" ] || [ -z "${XUI_USERNAME:-}" ] || [ -z "${XUI_PASSWORD:-}" ] || [ -z "${POMPNET_ADAPTER_SECRET:-}" ]; then
-  echo "[3xui-bridge] FATAL: set XUI_BASE_URL, XUI_USERNAME, XUI_PASSWORD and POMPNET_ADAPTER_SECRET as service secrets."
-  exit 1
-fi
-( while true; do python /opt/pompnet_3xui_bridge.py; echo "[3xui-bridge] restarting in 3s"; sleep 3; done ) &
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
@@ -160,6 +161,9 @@ esac
 # panel always on 8080; if Railway injected another PORT, listen there too (healthcheck never misses)
 # nginx config rendered from the template with the secret path (every start, so it always matches Xray)
 sed "s#__JXB__#${JINX_WS_BASE}#g" /opt/jinx/nginx.conf.tpl > /etc/nginx/conf.d/marzban.conf
+if [ "${POMPNET_3XUI_BRIDGE:-0}" != "1" ]; then
+  sed -i 's#127.0.0.1:8091#127.0.0.1:8000#g' /etc/nginx/conf.d/marzban.conf
+fi
 if [ "${JINX_OLD_PATHS:-1}" = "0" ]; then
   : > /etc/nginx/jinx-old.inc
   echo "[start] old config paths closed (JINX_OLD_PATHS=0)"
