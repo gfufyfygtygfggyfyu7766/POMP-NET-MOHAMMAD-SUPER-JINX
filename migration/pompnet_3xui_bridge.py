@@ -246,34 +246,6 @@ class Handler(BaseHTTPRequestHandler):
                 client={"email":username,"totalGB":quota,"expiryTime":expiry,"enable":True,"tgId":0,"limitIp":0,"limitHwid":0}
                 created=obj(request("POST","/panel/api/clients/add",{"client":client,"inboundIds":ids}))
                 return self.sendj(200, {"username":username,"status":"active","result":created})
-            raise BridgeError("not_found")
-        except BridgeError as e:
-            msg=str(e); status=401 if "login" in msg or "رمز" in msg or "token" in msg else 400
-            self.sendj(status,{"detail":msg})
-        except Exception as e: self.sendj(400,{"detail":str(e)[:300]})
-    def do_GET(self):
-        try:
-            if self.path == "/health": return self.sendj(200,{"ok":True,"engine":"3x-ui-v3.11.0"})
-            sub_match = re.fullmatch(r"/sub/([A-Za-z0-9_-]{8,128})(/info)?", urllib.parse.urlsplit(self.path).path)
-            if sub_match: return subscription_response(self, sub_match.group(1), sub_match.group(2) or "")
-            token_check(self.headers.get("Authorization",""))
-            if self.path == "/api/users":
-                imap=inbound_index()
-                rows=obj(request("GET","/panel/api/clients/list"))
-                return self.sendj(200,[normalize(x,imap) for x in (rows or [])])
-            if self.path == "/api/system":
-                imap=inbound_index()
-                rows=obj(request("GET","/panel/api/clients/list")) or []
-                return self.sendj(200,{"engine":"3X-UI v3.11.0","inbounds":len(imap),"total_users":len(rows),"active_users":sum(1 for x in rows if x.get("enable")),"online_users":None,"traffic_up":sum(int((x.get("traffic") or {}).get("up",0) or 0) for x in rows),"traffic_down":sum(int((x.get("traffic") or {}).get("down",0) or 0) for x in rows)})
-            if self.path == "/api/inbounds":
-                rows=obj(request("GET","/panel/api/inbounds/list"))
-                if not isinstance(rows,list): raise BridgeError("3X-UI inbound list is not an array")
-                safe=[]
-                for x in rows:
-                    if not isinstance(x,dict): continue
-                    proto=str(x.get("protocol","")).lower()
-                    safe.append({"id":x.get("id"),"remark":x.get("remark") or x.get("tag") or ("Inbound "+str(x.get("id"))),"tag":x.get("tag") or x.get("remark") or "","protocol":proto,"port":x.get("port"),"enable":bool(x.get("enable",True))})
-                return self.sendj(200,safe)
             if self.path == "/api/inbounds":
                 token_check(self.headers.get("Authorization",""))
                 body=json_body(self,16384)
@@ -296,6 +268,25 @@ class Handler(BaseHTTPRequestHandler):
                 form={"up":"0","down":"0","total":"0","remark":remark,"enable":"true","expiryTime":"0","listen":"","port":str(port),"protocol":proto,"settings":json.dumps(settings,separators=(",",":")),"streamSettings":json.dumps(stream,separators=(",",":")),"sniffing":json.dumps(sniff,separators=(",",":"))}
                 result=obj(request("POST","/panel/api/inbounds/add",form,form=True))
                 return self.sendj(201,{"created":True,"remark":remark,"protocol":proto,"port":port,"network":"ws","security":"none","path":path,"result":result,"note":"WebSocket بدون TLS ساخته شد؛ برای استفاده عمومی باید TLS در reverse proxy یا تنظیمات معتبر سرور فعال شود."})
+            raise BridgeError("not_found")
+        except BridgeError as e:
+            msg=str(e); status=401 if "login" in msg or "رمز" in msg or "token" in msg else 400
+            self.sendj(status,{"detail":msg})
+        except Exception as e: self.sendj(400,{"detail":str(e)[:300]})
+    def do_GET(self):
+        try:
+            if self.path == "/health": return self.sendj(200,{"ok":True,"engine":"3x-ui-v3.11.0"})
+            sub_match = re.fullmatch(r"/sub/([A-Za-z0-9_-]{8,128})(/info)?", urllib.parse.urlsplit(self.path).path)
+            if sub_match: return subscription_response(self, sub_match.group(1), sub_match.group(2) or "")
+            token_check(self.headers.get("Authorization",""))
+            if self.path == "/api/users":
+                imap=inbound_index()
+                rows=obj(request("GET","/panel/api/clients/list"))
+                return self.sendj(200,[normalize(x,imap) for x in (rows or [])])
+            if self.path == "/api/system":
+                imap=inbound_index()
+                rows=obj(request("GET","/panel/api/clients/list")) or []
+                return self.sendj(200,{"engine":"3X-UI v3.11.0","inbounds":len(imap),"total_users":len(rows),"active_users":sum(1 for x in rows if x.get("enable")),"online_users":None,"traffic_up":sum(int((x.get("traffic") or {}).get("up",0) or 0) for x in rows),"traffic_down":sum(int((x.get("traffic") or {}).get("down",0) or 0) for x in rows)})
             if self.path == "/api/diagnostics":
                 checks={"XUI_BASE_URL":bool(BASE),"POMPNET_ADAPTER_SECRET":bool(SECRET),"XUI_AUTH":bool(API_TOKEN or (USER and PASSWORD)),"XUI_SUBSCRIPTION_BASE_URL":bool(XUI_SUBSCRIPTION_BASE_URL),"POMPNET_SUB_MAP_DB":bool(SUB_MAP_DB)}
                 imap=inbound_index()
