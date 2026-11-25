@@ -172,6 +172,7 @@ def subscription_response(handler, legacy_token, suffix=''):
                        'X-Forwarded-Proto': 'https',
                        'X-Forwarded-Host': handler.headers.get('Host', '')}
             if handler.headers.get('Accept'): headers['Accept'] = handler.headers.get('Accept')
+            if API_TOKEN: headers['Authorization'] = 'Bearer ' + API_TOKEN
             with urllib.request.urlopen(urllib.request.Request(target, headers=headers), timeout=25) as res:
                 body = res.read(); handler.send_response(res.status)
                 for name in ('Content-Type','Content-Disposition','Subscription-Userinfo','Profile-Update-Interval','Profile-Title','Cache-Control','ETag','Last-Modified'):
