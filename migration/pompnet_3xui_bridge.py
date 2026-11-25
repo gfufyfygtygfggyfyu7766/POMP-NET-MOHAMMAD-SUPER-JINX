@@ -107,7 +107,7 @@ def obj(response):
 def inbound_index():
     rows = obj(request("GET", "/panel/api/inbounds/list"))
     if not isinstance(rows, list): raise BridgeError("3X-UI inbound list is not an array")
-    return {str(x.get("tag")): x for x in rows if isinstance(x, dict) and x.get("tag")}
+    return {str(x.get("tag") or x.get("remark") or ("inbound-"+str(x.get("id")))): x for x in rows if isinstance(x, dict)}
 
 def normalize(client, inbound_map):
     traffic = client.get("traffic") or {}
@@ -272,8 +272,30 @@ class Handler(BaseHTTPRequestHandler):
                 for x in rows:
                     if not isinstance(x,dict): continue
                     proto=str(x.get("protocol","")).lower()
-                    safe.append({"id":x.get("id"),"remark":x.get("remark") or x.get("tag") or ("Inbound "+str(x.get("id"))),"tag":x.get("tag",""),"protocol":proto,"port":x.get("port"),"enable":bool(x.get("enable",True))})
+                    safe.append({"id":x.get("id"),"remark":x.get("remark") or x.get("tag") or ("Inbound "+str(x.get("id"))),"tag":x.get("tag") or x.get("remark") or "","protocol":proto,"port":x.get("port"),"enable":bool(x.get("enable",True))})
                 return self.sendj(200,safe)
+            if self.path == "/api/inbounds":
+                token_check(self.headers.get("Authorization",""))
+                body=json_body(self,16384)
+                proto=str(body.get("protocol","")).lower()
+                if proto not in ("vless","vmess","trojan"): raise BridgeError("unsupported_protocol")
+                try: port=int(body.get("port"))
+                except Exception: raise BridgeError("invalid_port")
+                if port < 1024 or port > 65535: raise BridgeError("port_must_be_1024_to_65535")
+                remark=str(body.get("remark") or "").strip()
+                if not remark or len(remark)>64 or not re.fullmatch(r"[A-Za-z0-9 _.-]+",remark): raise BridgeError("invalid_inbound_name")
+                path=str(body.get("path") or ("/pompnet/"+proto)).strip()
+                if not path.startswith("/") or len(path)>96 or any(c in path for c in (" ","?","#")): raise BridgeError("invalid_ws_path")
+                rows=obj(request("GET","/panel/api/inbounds/list"))
+                if not isinstance(rows,list): raise BridgeError("cannot_read_existing_inbounds")
+                if any(int(x.get("port",0) or 0)==port for x in rows if isinstance(x,dict)): raise BridgeError("port_already_in_use")
+                settings={"clients":[]}
+                if proto=="vless": settings.update({"decryption":"none","fallbacks":[]})
+                stream={"network":"ws","security":"none","wsSettings":{"path":path,"headers":{}}}
+                sniff={"enabled":True,"destOverride":["http","tls","quic"],"metadataOnly":False,"routeOnly":False}
+                form={"up":"0","down":"0","total":"0","remark":remark,"enable":"true","expiryTime":"0","listen":"","port":str(port),"protocol":proto,"settings":json.dumps(settings,separators=(",",":")),"streamSettings":json.dumps(stream,separators=(",",":")),"sniffing":json.dumps(sniff,separators=(",",":"))}
+                result=obj(request("POST","/panel/api/inbounds/add",form,form=True))
+                return self.sendj(201,{"created":True,"remark":remark,"protocol":proto,"port":port,"network":"ws","security":"none","path":path,"result":result,"note":"WebSocket بدون TLS ساخته شد؛ برای استفاده عمومی باید TLS در reverse proxy یا تنظیمات معتبر سرور فعال شود."})
             if self.path == "/api/diagnostics":
                 checks={"XUI_BASE_URL":bool(BASE),"POMPNET_ADAPTER_SECRET":bool(SECRET),"XUI_AUTH":bool(API_TOKEN or (USER and PASSWORD)),"XUI_SUBSCRIPTION_BASE_URL":bool(XUI_SUBSCRIPTION_BASE_URL),"POMPNET_SUB_MAP_DB":bool(SUB_MAP_DB)}
                 imap=inbound_index()
