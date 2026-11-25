@@ -16,7 +16,7 @@ COPY ws.inc /etc/nginx/ws.inc
 COPY gate.inc /etc/nginx/gate.inc
 COPY nginx.conf /etc/nginx/conf.d/marzban.conf
 COPY nginx.conf /opt/jinx/nginx.conf.tpl
-COPY xray_config.json locked_inbound.json lock.py enforce_hosts.py ensure_admin.py doctor.py jinx_api.py /opt/
+COPY xray_config.json locked_inbound.json lock.py enforce_hosts.py ensure_admin.py doctor.py jinx_api.py pompnet_3xui_bridge.py /opt/
 COPY jinx.css jinx.js donate.html donate-config.js bot.html /opt/jinx/
 COPY pompnet-dashboard.html /opt/jinx/pompnet-dashboard.html
 COPY pompnet-motion.css pompnet-motion.js /opt/jinx/
