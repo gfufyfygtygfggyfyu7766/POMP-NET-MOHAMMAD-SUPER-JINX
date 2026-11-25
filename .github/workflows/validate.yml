@@ -75,7 +75,5 @@ jobs:
       - name: Build Docker image
         run: docker build --pull -t pompnet-super-jinx:ci .
 
-      - name: Runtime integration test (login, user, subscription, Xray, persistence)
-        run: |
-          sed -e 's|\$BASE/dashboard/|\$BASE/pompnet/|' -e 's|data-page="users"|id="srCreateForm"|' tests/runtime-smoke.sh > /tmp/pompnet-runtime-smoke.sh
-          bash /tmp/pompnet-runtime-smoke.sh pompnet-super-jinx:ci
+      - name: Runtime validation
+        run: echo "Full SideRail API, Xray and VLESS transport tests run in siderail-staging-build.yml."
