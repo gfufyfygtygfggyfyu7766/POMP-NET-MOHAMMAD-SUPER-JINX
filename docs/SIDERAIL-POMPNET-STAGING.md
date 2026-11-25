@@ -41,7 +41,7 @@ The connected Railway account has an expired trial and has rejected project crea
 
 ## POMP NET API and dashboard integration
 
-The existing POMP NET dashboard now includes a SideRail management page. It reuses the current POMP NET super-admin login and calls `/jinx-api/siderail/*`.
+The POMP NET dashboard is the only operator-facing panel. The management screen is embedded in the existing POMP NET login/session and calls `/jinx-api/siderail/*`; it does not launch or redirect the operator to a second dashboard. The separate SideRail process is a private API/core service only.
 
 The helper:
 - Validates the current POMP NET administrator token and requires `is_sudo=true`.

@@ -1,6 +1,6 @@
 # POMP NET ↔ SideRail live API and subscription compatibility layer
 
-The current POMP NET dashboard now contains a SideRail page. It reuses the existing POMP NET admin login/session; it does not ask the operator to paste SideRail credentials into the browser.
+The current POMP NET dashboard is the single operator-facing panel. Its integrated management page reuses the existing POMP NET admin login/session; it does not open or redirect to a separate SideRail dashboard, and it does not ask the operator to paste SideRail credentials into the browser.
 
 ## API path
 
@@ -12,7 +12,6 @@ Configure these secrets on the POMP NET service:
 - `SIDERAIL_INTERNAL_URL` — SideRail internal URL, e.g. the private Railway service URL.
 - `SIDERAIL_OWNER_USERNAME` — SideRail owner username.
 - `SIDERAIL_OWNER_PASSWORD` — SideRail owner password.
-- `SIDERAIL_PUBLIC_URL` — optional HTTPS public URL of the SideRail web app; shown only to authenticated POMP NET owners as a shortcut to the complete upstream UI.
 
 Do not commit credentials to Git. The helper caches the SideRail JWT in process memory and renews it after an upstream 401.
 
@@ -28,6 +27,10 @@ When `SIDERAIL_INTERNAL_URL` (or the `SIDERAIL_URL` fallback) is configured, Ngi
 5. Original token text, path, query string, User-Agent, host, content type, `Subscription-Userinfo`, `Profile-Update-Interval` and `Profile-Title` are preserved.
 
 The SideRail backup converter preserves the old Marzban token values where SideRail can represent the user. After a successful import, those old `/sub/{token}` URLs resolve against SideRail without changing the URL printed on the user's device. Unsupported or rejected users remain on Marzban.
+
+## Single-panel operator experience
+
+The public POMP NET dashboard is the only operator-facing UI. SideRail remains a private backend process/service reached through the owner-authenticated `/jinx-api/siderail/*` bridge. No public SideRail dashboard URL or second login is linked from the POMP NET interface. Upstream license and authorship notices remain preserved in the source and legal documentation.
 
 ## Dashboard
 
