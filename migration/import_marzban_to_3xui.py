@@ -20,20 +20,28 @@ def api(base, token, path, payload=None):
         raise RuntimeError(str(obj.get("msg") or "3X-UI API rejected request"))
     return obj.get("obj",obj) if isinstance(obj,dict) else obj
 
-def user_uuid(row):
-    found=set()
-    value=row.get("uuid")
-    if isinstance(value,str) and value.strip(): found.add(value.strip())
-    proxies=row.get("proxies") or {}
-    if isinstance(proxies,dict):
-        for config in proxies.values():
-            if isinstance(config,dict):
-                for key in ("id","uuid"):
-                    v=config.get(key)
-                    if isinstance(v,str) and v.strip(): found.add(v.strip())
-    if len(found)!=1:
-        raise ValueError("UUID missing or conflicting across protocols; refusing user: "+str(row.get("username")))
-    return next(iter(found))
+def credentials(row, protocols):
+    proxies=row.get('proxies') or {}
+    if not isinstance(proxies,dict): proxies={}
+    uuid_values=set()
+    if row.get('uuid'): uuid_values.add(str(row['uuid']).strip())
+    trojan_passwords=set()
+    for proto, config in proxies.items():
+        if not isinstance(config,dict): continue
+        proto=str(proto).lower()
+        if proto in ('vless','vmess'):
+            for key in ('id','uuid'):
+                if config.get(key): uuid_values.add(str(config[key]).strip())
+        if proto=='trojan':
+            for key in ('password','id','uuid'):
+                if config.get(key): trojan_passwords.add(str(config[key]).strip())
+    if protocols.intersection({'vless','vmess'}) and len(uuid_values)!=1:
+        raise ValueError('VLESS/VMess UUID missing or conflicting; refusing user: '+str(row.get('username')))
+    if len(uuid_values)>1: raise ValueError('conflicting UUIDs across VLESS/VMess; refusing user: '+str(row.get('username')))
+    if 'trojan' in protocols and len(trojan_passwords)!=1:
+        raise ValueError('Trojan password missing or conflicting; refusing user: '+str(row.get('username')))
+    if len(trojan_passwords)>1: raise ValueError('conflicting Trojan credentials; refusing user: '+str(row.get('username')))
+    return (next(iter(uuid_values)) if uuid_values else None, next(iter(trojan_passwords)) if trojan_passwords else None)
 
 def enabled(row):
     status=str(row.get("status","active")).lower()
@@ -70,7 +78,7 @@ def main():
             if not protocols: raise ValueError("no supported VLESS/VMess/Trojan proxy in export")
             missing=protocols-set(inbound_map)
             if missing: raise ValueError("missing inbound IDs for: "+",".join(sorted(missing)))
-            uuid=user_uuid(row)
+            uuid, trojan_password=credentials(row,protocols)
             expire=row.get("expire")
             if isinstance(expire,str):
                 # Marzban exports ISO timestamps in some schema versions.
@@ -80,13 +88,15 @@ def main():
             quota=int(row.get("data_limit") or 0)
             if quota<0: raise ValueError("negative data limit")
             ids=sorted({inbound_map[x] for x in protocols})
-            client={"id":uuid,"email":username,"subId":token,"totalGB":quota,
+            client={"email":username,"subId":token,"totalGB":quota,
                     "expiryTime":expire_ms,"enable":enabled(row),"tgId":0,
                     "limitIp":0,"limitHwid":0}
+            if uuid: client["id"]=uuid
+            if trojan_password: client["password"]=trojan_password
             old=by_email.get(username)
             if old:
-                if str(old.get("id",""))!=uuid or str(old.get("subId",""))!=token:
-                    raise ValueError("email already exists in 3X-UI with a different UUID/subId; manual review required")
+                if (uuid and str(old.get("id",old.get("uuid","")))!=uuid) or (trojan_password and str(old.get("password",""))!=trojan_password) or str(old.get("subId",""))!=token:
+                    raise ValueError("email already exists in 3X-UI with different credentials/subId; manual review required")
                 action="already-present"
             else: action="create"
             prepared.append((row,client,ids,action,token,username))
