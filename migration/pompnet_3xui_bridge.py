@@ -1,8 +1,8 @@
 """POMP NET compatibility bridge for MHSanaei 3X-UI v3.11.0.
 
 Staging-only HTTP adapter for the existing dashboard's core endpoints.
-No legacy database is modified. Public /sub tokens are intentionally NOT
-rewritten until a verified legacy-token -> 3X-UI subId migration exists.
+No legacy database is modified. Existing /sub tokens are mapped through a
+separate persistent SQLite table; unmapped links retain the Marzban fallback.
 """
 import base64, hashlib, hmac, http.cookiejar, json, os, re, sqlite3, threading, time
 import urllib.error, urllib.parse, urllib.request
