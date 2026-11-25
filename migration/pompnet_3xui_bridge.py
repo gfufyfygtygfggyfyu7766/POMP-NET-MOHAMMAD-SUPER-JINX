@@ -63,6 +63,10 @@ def login_xui(username, password):
         return
     if not USER or not PASSWORD or not hmac.compare_digest(username, USER) or not hmac.compare_digest(password, PASSWORD):
         raise BridgeError("نام کاربری یا رمز عبور نادرست است")
+    # A configured API token authenticates upstream API calls; the dashboard
+    # credentials above are still checked against the configured owner account.
+    if API_TOKEN:
+        return
     with lock:
         try:
             c = request("GET", "/panel/csrf-token")
