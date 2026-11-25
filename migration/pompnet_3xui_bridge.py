@@ -61,12 +61,10 @@ def request(method, path, payload=None, form=False):
 
 def login_xui(username, password):
     global csrf
-    if API_TOKEN:
-        return
+    # Always authenticate the dashboard owner, even when the upstream API token is configured.
     if not USER or not PASSWORD or not hmac.compare_digest(username, USER) or not hmac.compare_digest(password, PASSWORD):
         raise BridgeError("نام کاربری یا رمز عبور نادرست است")
-    # A configured API token authenticates upstream API calls; the dashboard
-    # credentials above are still checked against the configured owner account.
+    # A configured API token authenticates upstream 3X-UI calls after owner login.
     if API_TOKEN:
         return
     with lock:
