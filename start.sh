@@ -1,19 +1,18 @@
 #!/bin/bash
 set -e
 
-# POMP NET MOHAMMAD: fixed owner account for this deployment
-# ensure_admin.py hashes this password into the Marzban database.
-export ADMIN_USERNAME="ADMIN_tanel9990"
-export ADMIN_PASSWORD="ADMIN_tanel9990"
-export ALLOW_INSECURE_ADMIN_PASSWORD="1"
-export RESET_ADMIN_PASSWORD="1"
+# Owner identity is stable; credentials come from the ADMIN_PASSWORD Railway Secret.
+# Never generate, rotate, or print an owner password during startup.
+export ADMIN_USERNAME="${ADMIN_USERNAME:-ADMIN_tanel9990}"
+export ALLOW_INSECURE_ADMIN_PASSWORD="${ALLOW_INSECURE_ADMIN_PASSWORD:-0}"
+export RESET_ADMIN_PASSWORD="${RESET_ADMIN_PASSWORD:-0}"
 
 echo "=== ⚡ POMP NET MOHAMMAD | SUPER JINX ==="
 # ⚡ more open connections for nginx + Xray (many users / many tabs at once), never fatal
 ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 
 # Owner credentials are stored as a bcrypt hash in the persistent Marzban database.
-# The owner username is fixed as ADMIN_tanel9990; ensure_admin.py generates a one-time password if no Secret is supplied.
+# The owner username is fixed as ADMIN_tanel9990; the password is operator-supplied.
 unset SUDO_USERNAME SUDO_PASSWORD
 # internal wiring is forced too, so a wrong Railway variable can never break the panel
 export UVICORN_HOST=127.0.0.1
@@ -37,6 +36,16 @@ export USE_CUSTOM_JSON_FOR_STREISAND="${USE_CUSTOM_JSON_FOR_STREISAND:-False}"
 export USE_CUSTOM_JSON_FOR_HAPP="${USE_CUSTOM_JSON_FOR_HAPP:-False}"
 
 mkdir -p /var/lib/marzban /run/jinx
+# Owner password is fixed by the operator through the ADMIN_PASSWORD Railway Secret.
+# Never generate, rotate, or print a random owner password during startup.
+ADMIN_MARKER=/var/lib/marzban/.pompnet-default-admin-applied
+if [ -z "${ADMIN_PASSWORD:-}" ]; then
+  if [ ! -e "$ADMIN_MARKER" ] || [ "${RESET_ADMIN_PASSWORD}" = "1" ]; then
+    echo "[admin] FATAL: set ADMIN_PASSWORD as a Railway Secret before first setup or an explicit reset."
+    exit 1
+  fi
+  echo "[admin] existing owner detected; preserving the password hash in the persistent database"
+fi
 # 🔐 secret config path /cdn/<random id> (SuperJinX style): made once, kept in the Volume = configs never change.
 #    JINX_PATH_SECRET in Railway Variables sets your own id (8-64 letters / digits / -).
 JX_FILE=/var/lib/marzban/jinx_path
